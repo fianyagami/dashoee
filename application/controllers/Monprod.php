@@ -31,13 +31,13 @@ class Monprod extends CI_Controller
     {
         $thn   = $this->input->post('thn');
         $bln   = $this->input->post('bln');
-        $dept  = $this->input->post('dept');
+        // $dept  = $this->input->post('dept');
         $mesin = $this->input->post('mesin');
 
         $data = $this->Monprod_mod->getDetail(
             $thn,
             $bln,
-            $dept,
+            // $dept,
             $mesin
         );
 

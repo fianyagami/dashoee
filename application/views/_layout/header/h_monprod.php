@@ -51,4 +51,14 @@
     .text-right {
         text-align: right !important;
     }
+
+    .produk-wrap {
+        white-space: normal !important;
+        word-break: break-word;
+
+        min-width: 250px;
+        max-width: 400px;
+
+        line-height: 16px;
+    }
 </style>

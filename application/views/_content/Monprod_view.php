@@ -55,10 +55,23 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-2">
+                            <div class="col-md-4">
+
+                                <label>Mesin</label>
+
+                                <select id="mesin"
+                                    class="form-control select2_single">
+
+                                    <option value="">- Pilih Mesin -</option>
+
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-3">
                                 <label>&nbsp;</label>
 
-                                <button id="btnBrowse"
+                                <button id="btnBrowseMonprod"
                                     class="btn btn-primary form-control">
 
                                     <i class="fa fa-search"></i>
@@ -74,7 +87,7 @@
             </div>
 
             <!-- TABEL MESIN -->
-            <div class="col-md-3">
+            <!-- <div class="col-md-3">
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>Departemen & Mesin</h2>
@@ -97,10 +110,10 @@
 
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- DETAIL -->
-            <div class="col-md-9">
+            <div class="col-md-12">
                 <div class="x_panel">
 
                     <div class="x_title">
@@ -123,7 +136,6 @@
                             </div>
                             <table id="tblDetail"
                                 class="table table-bordered table-striped">
-
                                 <thead>
                                     <tr>
                                         <th>Tanggal</th>

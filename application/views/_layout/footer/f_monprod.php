@@ -9,7 +9,126 @@
     var selectedDept = '';
     var selectedMesin = '';
 
-    function loadDetailProduksi(thn, bln, dept, mesin) {
+    function loadMesin() {
+        var thn = $('#thn').val();
+        var bln = $('#bln').val();
+
+        $.ajax({
+
+            url: base_url + 'Monprod/get_mesin',
+
+            type: 'POST',
+
+            data: {
+                thn: thn,
+                bln: bln
+            },
+
+            dataType: 'JSON',
+
+            beforeSend: function() {
+
+                $('#btnBrowseMonprod').html(
+                    '<i class="fa fa-spinner fa-spin"></i> Loading...'
+                );
+
+            },
+
+            success: function(response) {
+
+                $('#mesin').empty();
+
+                $('#mesin').append(
+                    '<option value="">- Pilih Mesin -</option>'
+                );
+
+                $.each(response, function(i, item) {
+
+                    $('#mesin').append(
+
+                        '<option ' +
+                        'value="' + item.MESIN + '">' +
+
+                        item.NAMA_DEPARTEMEN +
+                        ' - ' +
+                        item.MESIN +
+
+                        '</option>'
+
+                    );
+
+                });
+
+            },
+
+            complete: function() {
+
+                $('#btnBrowseMonprod').html(
+                    '<i class="fa fa-search"></i> Browse'
+                );
+
+            }
+
+        });
+    }
+
+    $('#thn, #bln').on('change', function() {
+
+        loadMesin();
+
+    });
+
+    // function loadDetailProduksi(thn, bln, dept, mesin) {
+    //     $.ajax({
+
+    //         url: base_url + 'Monprod/get_detail',
+    //         type: 'POST',
+
+    //         data: {
+    //             thn: thn,
+    //             bln: bln,
+    //             dept: dept,
+    //             mesin: mesin
+    //         },
+
+    //         dataType: 'JSON',
+
+    //         beforeSend: function() {
+
+    //             $('#loadingDetail').show();
+
+    //             tblDetail.clear();
+    //             tblDetail.draw();
+
+    //         },
+
+    //         success: function(response) {
+
+    //             tblDetail.clear();
+    //             tblDetail.rows.add(response);
+    //             tblDetail.draw();
+
+    //         },
+
+    //         complete: function() {
+
+    //             $('#loadingDetail').hide();
+
+    //         },
+
+    //         error: function(xhr) {
+
+    //             $('#loadingDetail').hide();
+
+    //             alert('Gagal mengambil detail produksi.');
+    //             console.log(xhr.responseText);
+
+    //         }
+
+    //     });
+    // }
+
+    function loadDetailProduksi(thn, bln, mesin) {
         $.ajax({
 
             url: base_url + 'Monprod/get_detail',
@@ -18,7 +137,7 @@
             data: {
                 thn: thn,
                 bln: bln,
-                dept: dept,
+                // dept: dept,
                 mesin: mesin
             },
 
@@ -61,9 +180,17 @@
 
     $(document).ready(function() {
 
+        loadMesin();
+
         // SELECT2
         $('.select2_single').select2({
             width: '100%'
+        });
+
+        $('.select2_single').select2({
+
+            width: '100%',
+            placeholder: 'Pilih Mesin'
         });
 
         // TABEL MESIN
@@ -98,48 +225,65 @@
         });
 
         // KLIK TOMBOL BROWSE
-        $('#btnBrowse').on('click', function() {
+        $('#btnBrowseMonprod').on('click', function() {
 
             var thn = $('#thn').val();
             var bln = $('#bln').val();
+            var mesin = $('#mesin').val();
 
-            $.ajax({
+            if (mesin == '') {
+                alert('Pilih mesin terlebih dahulu');
+                return;
+            }
 
-                url: "<?= base_url('Monprod/get_mesin') ?>",
-                type: "POST",
+            $('#infoMesin').html(
+                'Mesin : <b>' + mesin + '</b>'
+            );
 
-                data: {
-                    thn: thn,
-                    bln: bln
-                },
+            loadDetailProduksi(
+                thn,
+                bln,
+                // '',
+                mesin
+            );
 
-                dataType: "JSON",
+            // $.ajax({
 
-                beforeSend: function() {
+            //     url: "<?= base_url('Monprod/get_mesin') ?>",
+            //     type: "POST",
 
-                    $('#btnBrowse').html(
-                        '<i class="fa fa-spinner fa-spin"></i> Loading...'
-                    );
+            //     data: {
+            //         thn: thn,
+            //         bln: bln
+            //     },
 
-                },
+            //     dataType: "JSON",
 
-                success: function(response) {
+            //     beforeSend: function() {
 
-                    tblMesin.clear();
-                    tblMesin.rows.add(response);
-                    tblMesin.draw();
+            //         $('#btnBrowseMonprod').html(
+            //             '<i class="fa fa-spinner fa-spin"></i> Loading...'
+            //         );
 
-                },
+            //     },
 
-                complete: function() {
+            //     success: function(response) {
 
-                    $('#btnBrowse').html(
-                        '<i class="fa fa-search"></i> Browse'
-                    );
+            //         tblMesin.clear();
+            //         tblMesin.rows.add(response);
+            //         tblMesin.draw();
 
-                }
+            //     },
 
-            });
+            //     complete: function() {
+
+            //         $('#btnBrowseMonprod').html(
+            //             '<i class="fa fa-search"></i> Browse'
+            //         );
+
+            //     }
+
+            // });
 
         });
 
@@ -191,7 +335,7 @@
                             loadDetailProduksi(
                                 thn,
                                 bln,
-                                selectedDept,
+                                // selectedDept,
                                 selectedMesin
                             );
 
@@ -278,6 +422,14 @@
                     className: 'text-center angka-hasil'
                 }
 
+            ],
+
+            columnDefs: [
+
+                {
+                    targets: 3,
+                    className: 'produk-wrap'
+                }
             ]
 
         });
@@ -328,18 +480,19 @@
             var thn = $('#thn').val();
             var bln = $('#bln').val();
 
-            var dept = data.NAMA_DEPARTEMEN;
+            // var dept = data.NAMA_DEPARTEMEN;
             var mesin = data.MESIN;
 
             // simpan global
-            selectedDept = dept;
+            // selectedDept = dept;
             selectedMesin = mesin;
 
             $('#infoMesin').html(
                 'Departemen : <b>' + dept + '</b> &nbsp; | &nbsp; Mesin : <b>' + mesin + '</b>'
             );
 
-            loadDetailProduksi(thn, bln, dept, mesin);
+            // loadDetailProduksi(thn, bln, dept, mesin);
+            loadDetailProduksi(thn, bln, mesin);
 
         });
 
