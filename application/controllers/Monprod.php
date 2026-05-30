@@ -11,20 +11,18 @@ class Monprod extends CI_Controller
 
     public function index()
     {
-        $data['template'] = "Monprod_view";
-        $data['link'] = base_url() . 'monprod';
+        $data['template']   = "Monprod_view";
+        $data['js']         = "Monprod_script";
+        $data['css']        = "Monprod_style";
+        $data['link']       = base_url() . 'monprod';
+
         $this->load->view('v_main', $data);
     }
 
     public function get_mesin()
     {
-        $thn = $this->input->post('thn');
-        $bln = $this->input->post('bln');
-
-        $data = $this->Monprod_mod
-            ->getMesin($thn, $bln);
-
-        echo json_encode($data);
+        $q = $this->input->get('q');
+        echo json_encode($this->Monprod_mod->getMesin($q));
     }
 
     public function get_detail()

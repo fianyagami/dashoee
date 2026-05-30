@@ -12,10 +12,14 @@ class Dashoeekk extends CI_Controller
 
     public function index()
     {
-        $data['tahun'] = date('Y');
-        $data['bulan'] = date('n');
-        $data['template'] = "Dashoeekk_view";
-        $data['link'] = base_url() . 'dashoeekk';
+        $data['tahun']      = date('Y');
+        $data['bulan']      = date('n');
+        $data['template']   = "Dashoeekk_view";
+        $data['js']         = "Dashoeekk_script";
+        $data['css']        = "Dashoeekk_style";
+
+        $data['link']       = base_url() . 'dashoeekk';
+
         $this->load->view('v_main', $data);
     }
 

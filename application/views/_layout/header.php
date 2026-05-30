@@ -61,8 +61,18 @@
         }
     </style>
 
+    <?php
+    if (!empty($css)) {
+        if (is_file(APPPATH . 'views/_style/' . $css . '.php')) {
+            include_once APPPATH . 'views/_style/' . $css . '.php';
+        }
+    }
+    ?>
+
     <!-- Style Tiap Form -->
-    <?php include_once 'header/h_monprod.php'; ?>
-    <?php include_once 'header/h_dashoeekk.php'; ?>
+    <?php // include_once 'header/h_monprod.php'; 
+    ?>
+    <?php // include_once 'header/h_dashoeekk.php'; 
+    ?>
 
 </head>

@@ -1,6 +1,7 @@
 <?php include_once '_layout/header.php'; ?>
 
 <body class="nav-md">
+
     <?php
     define('_HOME', 1);
     $is_home = true;
@@ -182,6 +183,14 @@
     </div>
 
     <?php include_once '_layout/footer.php'; ?>
+
+    <?php
+    if (!empty($js)) {
+        if (is_file(APPPATH . 'views/_script/' . $js . '.php')) {
+            include_once '_script/' . $js . '.php';
+        }
+    }
+    ?>
 
 </body>
 

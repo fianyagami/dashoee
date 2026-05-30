@@ -61,5 +61,5 @@
 <script src="<?= $GLOBALS['assets'] ?>js/echarts.min.js"></script>
 
 <!-- Scripts Tiap Form -->
-<?php include_once 'footer/f_monprod.php'; ?>
-<?php include_once 'footer/f_dashoeekk.php'; ?>
+<?php //include_once 'footer/f_dashoeekk.php'; 
+?>

@@ -9,11 +9,6 @@ class Dashoeekk_mod extends CI_Model
         $sql = "
             SELECT KODE_MESIN AS KDMESIN, TRIM(NAMA_MESIN) AS MESIN FROM V_MESIN_01
         ";
-        // $sql = "
-        //     SELECT DISTINCT KDMESIN, MESIN
-        //     FROM VOEE_MONITORING
-        //     WHERE MESIN IS NOT NULL
-        // ";
 
         $bind = array();
 

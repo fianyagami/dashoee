@@ -4,14 +4,12 @@
 
 <script>
     var tblDetail;
-    var tblMesin;
 
-    var selectedDept = '';
     var selectedMesin = '';
 
     function loadMesin() {
-        var thn = $('#thn').val();
-        var bln = $('#bln').val();
+        // var thn = $('#thn').val();
+        // var bln = $('#bln').val();
 
         $.ajax({
 
@@ -20,8 +18,8 @@
             type: 'POST',
 
             data: {
-                thn: thn,
-                bln: bln
+                // thn: thn,
+                // bln: bln
             },
 
             dataType: 'JSON',
@@ -72,11 +70,12 @@
         });
     }
 
-    $('#thn, #bln').on('change', function() {
 
-        loadMesin();
+    // $('#thn, #bln').on('change', function() {
 
-    });
+    //     loadMesin();
+
+    // });
 
     // function loadDetailProduksi(thn, bln, dept, mesin) {
     //     $.ajax({
@@ -187,42 +186,42 @@
             width: '100%'
         });
 
-        $('.select2_single').select2({
+        $('.select2_mesin').select2({
 
             width: '100%',
             placeholder: 'Pilih Mesin'
         });
 
         // TABEL MESIN
-        tblMesin = $('#tblMesin').DataTable({
+        // tblMesin = $('#tblMesin').DataTable({
 
-            processing: true,
+        //     processing: true,
 
-            paging: false,
-            info: false,
+        //     paging: false,
+        //     info: false,
 
-            searching: false,
-            ordering: true,
+        //     searching: false,
+        //     ordering: true,
 
-            scrollY: '550px',
-            scrollCollapse: true,
+        //     scrollY: '550px',
+        //     scrollCollapse: true,
 
-            fixedHeader: true,
-            scrollY: '550px',
-            scrollCollapse: true,
-            fixedHeader: true,
+        //     fixedHeader: true,
+        //     scrollY: '550px',
+        //     scrollCollapse: true,
+        //     fixedHeader: true,
 
-            data: [],
+        //     data: [],
 
-            columns: [{
-                    data: 'NAMA_DEPARTEMEN'
-                },
-                {
-                    data: 'MESIN'
-                }
-            ]
+        //     columns: [{
+        //             data: 'NAMA_DEPARTEMEN'
+        //         },
+        //         {
+        //             data: 'MESIN'
+        //         }
+        //     ]
 
-        });
+        // });
 
         // KLIK TOMBOL BROWSE
         $('#btnBrowseMonprod').on('click', function() {
@@ -247,43 +246,6 @@
                 mesin
             );
 
-            // $.ajax({
-
-            //     url: "<?= base_url('Monprod/get_mesin') ?>",
-            //     type: "POST",
-
-            //     data: {
-            //         thn: thn,
-            //         bln: bln
-            //     },
-
-            //     dataType: "JSON",
-
-            //     beforeSend: function() {
-
-            //         $('#btnBrowseMonprod').html(
-            //             '<i class="fa fa-spinner fa-spin"></i> Loading...'
-            //         );
-
-            //     },
-
-            //     success: function(response) {
-
-            //         tblMesin.clear();
-            //         tblMesin.rows.add(response);
-            //         tblMesin.draw();
-
-            //     },
-
-            //     complete: function() {
-
-            //         $('#btnBrowseMonprod').html(
-            //             '<i class="fa fa-search"></i> Browse'
-            //         );
-
-            //     }
-
-            // });
 
         });
 

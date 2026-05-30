@@ -16,6 +16,17 @@ class Login extends CI_Controller
         $this->load->view('v_login');
     }
 
+    public function getClientIp()
+    {
+        $ip = $this->input->ip_address();
+
+        if ($ip == '::1') {
+            $ip = '127.0.0.1';
+        }
+
+        return $ip;
+    }
+
     function log_in()
     {
         $this->load->library('Aes_encryption');
@@ -24,16 +35,11 @@ class Login extends CI_Controller
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        $encrypted_password = $aes->encrypt($password);
-        var_dump("Encrypted Password: " . $encrypted_password);
-
-        // Stop eksekusi sementara
-        // die();
+        // $encrypted_password = $aes->encrypt($password);
+        // var_dump("Encrypted Password: " . $encrypted_password);
 
         $where = array(
             'USERNAME' => $username,
-            // 'password' => md5($password),            
-            // 'PASSWORD2' => $password,
             'PASSWORD' => $aes->encrypt($password),
             'IS_AKTIF' => 1
         );
@@ -50,7 +56,13 @@ class Login extends CI_Controller
             $this->session->set_userdata($GLOBALS['project'] . '-KA', $data->KA);
 
             //          UPDATE LAST LOGIN
-            // $this->m_login->updateDataLastLogin($data->id_user);
+            $ip = $this->getClientIp();
+
+            $this->m_login->insertLogLogin(
+                $data->ID_USER,
+                $ip
+            );
+
             redirect(base_url("core"));
         } else {
             redirect(base_url());

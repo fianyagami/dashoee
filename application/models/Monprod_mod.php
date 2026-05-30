@@ -9,99 +9,37 @@ class Monprod_mod extends CI_Model
         parent::__construct();
     }
 
-    public function getMesin($thn, $bln)
+    public function getMesin($q = null)
     {
         $sql = "
+            SELECT KODE_MESIN AS KDMESIN, TRIM(NAMA_MESIN) AS MESIN FROM V_MESIN_01
+        ";
 
-        SELECT DISTINCT
-            NAMA_DEPARTEMEN,
-            MESIN
+        $bind = array();
 
-        FROM VOEE_MONITORING
+        if (!empty($q)) {
+            $sql .= " WHERE UPPER(NAMA_MESIN) LIKE UPPER(?)";
+            $bind[] = "%" . $q . "%";
+            // $bind[] = "%" . $q . "%";
+        }
 
-        WHERE THN = ?
-        AND BLN_ = ?
+        $sql .= " ORDER BY TRIM(NAMA_MESIN) ";
 
-        ORDER BY
-            NAMA_DEPARTEMEN,
-            MESIN
+        $query = $this->db->query($sql, $bind);
 
-    ";
+        $data = array();
+        foreach ($query->result() as $row) {
+            $data[] = array(
+                'id'      => $row->KDMESIN,
+                'text'    => $row->MESIN,
+                'kdmesin' => $row->KDMESIN,
+                'mesin'   => $row->MESIN
+            );
+        }
 
-        return $this->db->query($sql, [
-            $thn,
-            $bln
-        ])->result();
+        return array('results' => $data);
     }
 
-    // public function getDetail($thn, $bln, $dept, $mesin)
-    // {
-    //     $sql = "
-    //         SELECT
-    //             TANGGAL,
-    //             SHIFT_,
-    //             NOMOR_KK,
-    //             PRODUK,
-    //             PROSES,
-    //             TARGET,
-    //             SAT_TARGET,
-
-    //             SUM(
-    //                 CASE
-    //                     WHEN KEGIATAN = 'PRODUKSI MURNI'
-    //                     THEN WAKTU_BLT
-    //                     ELSE 0
-    //                 END
-    //             ) AS WAKTU_PROD,
-
-    //             SUM(
-    //                 CASE
-    //                     WHEN KEGIATAN != 'PRODUKSI MURNI'
-    //                     THEN WAKTU_BLT
-    //                     ELSE 0
-    //                 END
-    //             ) AS WAKTU_NON_PROD,
-
-    //             SUM(WAKTU_BLT) AS WAKTU_TOTAL,
-
-    //             SUM(BAIK) AS BAIK,
-    //             SUM(RUSAK) AS RUSAK,
-    //             SUM(OUTPUT) AS OUTPUT,
-
-    //             COALESCE(
-    //                 MAX(SAT_HASIL_BAIK),
-    //                 MAX(SAT_HASIL_RUSAK)
-    //             ) AS SAT_HASIL_OUTPUT
-
-    //         FROM VOEE_MONITORING
-
-    //         WHERE THN = ?
-    //         AND BLN_ = ?
-    //         AND NAMA_DEPARTEMEN = ?
-    //         AND MESIN = ?
-
-    //         GROUP BY
-    //             TANGGAL,
-    //             SHIFT_,
-    //             NOMOR_KK,
-    //             PRODUK,
-    //             PROSES,
-    //             TARGET,
-    //             SAT_TARGET
-
-    //         ORDER BY
-    //             TANGGAL,
-    //             SHIFT_,
-    //             NOMOR_KK
-    //     ";
-
-    //     return $this->db->query($sql, [
-    //         $thn,
-    //         $bln,
-    //         $dept,
-    //         $mesin
-    //     ])->result();
-    // }
 
     public function getDetail($thn, $bln, $mesin)
     {
