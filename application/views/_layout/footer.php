@@ -60,6 +60,51 @@
 <script src="<?= $GLOBALS['assets'] ?>js/custom.min.js"></script>
 <script src="<?= $GLOBALS['assets'] ?>js/echarts.min.js"></script>
 
+<script>
+    $(document).on('click', '#btnFullscreen', function() {
+
+        if (!document.fullscreenElement) {
+
+            // Masuk Fullscreen
+            document.documentElement.requestFullscreen()
+                .catch(err => {
+                    console.log("Fullscreen error:", err);
+                });
+
+        } else {
+
+            // Keluar Fullscreen
+            document.exitFullscreen();
+
+        }
+
+    });
+
+    function updateFullscreenIcon() {
+
+        const icon = $('#btnFullscreen span');
+
+        if (document.fullscreenElement) {
+            icon.removeClass('glyphicon-fullscreen')
+                .addClass('glyphicon-resize-small');
+        } else {
+            icon.removeClass('glyphicon-resize-small')
+                .addClass('glyphicon-fullscreen');
+        }
+
+    }
+
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+
+    $('#btnSettings').click(function() {
+        alert('Menu masih dalam pengembangan');
+    });
+
+    $('#btnLock').click(function() {
+        alert('Menu masih dalam pengembangan');
+    });
+</script>
+
 <!-- Scripts Tiap Form -->
 <?php //include_once 'footer/f_dashoeekk.php'; 
 ?>

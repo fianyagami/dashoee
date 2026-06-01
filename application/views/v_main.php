@@ -34,13 +34,25 @@
 
                     <!-- /menu footer buttons -->
                     <div class="sidebar-footer hidden-small">
-                        <a data-toggle="tooltip" data-placement="top" title="Settings">
+                        <a href="javascript:void(0);"
+                            id="btnSettings"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="Settings">
                             <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
                         </a>
-                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                        <a href="javascript:void(0);"
+                            id="btnFullscreen"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="FullScreen">
                             <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
                         </a>
-                        <a data-toggle="tooltip" data-placement="top" title="Lock">
+                        <a href="javascript:void(0);"
+                            id="btnLock"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            title="Lock">
                             <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
                         </a>
                         <a data-toggle="tooltip" data-placement="top" title="Logout" href="<?= base_url('login/log_out'); ?>">
