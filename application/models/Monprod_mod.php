@@ -46,6 +46,7 @@ class Monprod_mod extends CI_Model
         $sql = "
             SELECT
                 TANGGAL,
+                TO_CHAR(TANGGAL, 'YYYY-MM-DD HH24:MI:SS') AS TANGGAL_PARAM,
                 SHIFT_,
                 NOMOR_KK,
                 PRODUK,
@@ -106,5 +107,44 @@ class Monprod_mod extends CI_Model
             $bln,
             $mesin
         ])->result();
+    }
+
+    public function get_detail_waktu($mesin, $tanggal, $shift, $nomor_kk, $proses)
+    {
+        $sql = "
+        SELECT
+            NOMOR_LHP,
+            NO_URUT_DETAIL,
+            KEGIATAN,
+            KTG_LOSSTIME,
+            TO_CHAR(JAM1, 'YYYY-MM-DD HH24:MI:SS') AS JAM1,
+            TO_CHAR(JAM2, 'YYYY-MM-DD HH24:MI:SS') AS JAM2,
+            WAKTU_BLT,
+            BAIK,
+            SAT_HASIL_BAIK,
+            NAMA_WASTE,
+            RUSAK AS RUSAK,
+            SAT_HASIL_RUSAK,
+            OUTPUT,
+            TRIM(NAMA1) || 
+                CASE WHEN NAMA2 IS NOT NULL THEN ', ' || TRIM(NAMA2) ELSE '' END ||
+                CASE WHEN NAMA3 IS NOT NULL THEN ', ' || TRIM(NAMA3) ELSE '' END AS OPERATOR,
+            PENGAWAS
+        FROM VOEE_MONITORING
+        WHERE KDMESIN = ?
+          AND TANGGAL = TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS')
+          AND SHIFT_ = ?
+          AND NOMOR_KK = ?
+          AND PROSES = ?
+        ORDER BY NOMOR_LHP ASC, NO_URUT_DETAIL ASC
+    ";
+
+        return $this->db->query($sql, array(
+            $mesin,
+            $tanggal,
+            $shift,
+            $nomor_kk,
+            $proses
+        ))->result();
     }
 }

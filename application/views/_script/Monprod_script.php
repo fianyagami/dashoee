@@ -11,6 +11,9 @@
         var tblDetail = null;
         var selectedMesin = '';
 
+        let tblDetailWaktu = null;
+        let selectedDetailParam = {};
+
         function formatNumberOEE(data) {
             if (data === null || data === undefined || data === '') return '0';
 
@@ -124,6 +127,11 @@
                         data: 'TANGGAL'
                     },
                     {
+                        data: 'TANGGAL_PARAM',
+                        visible: false,
+                        searchable: false
+                    },
+                    {
                         data: 'SHIFT_'
                     },
                     {
@@ -177,11 +185,31 @@
                     {
                         data: 'SAT_HASIL_OUTPUT',
                         className: 'text-center angka-hasil'
+                    },
+                    {
+                        data: null,
+                        className: 'text-center',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                            <button type="button" class="btn btn-xs btn-warning btn-detail-waktu">
+                                <i class="fa fa-file-text"></i> Detail
+                            </button>
+                        `;
+                        }
                     }
                 ],
 
                 columnDefs: [{
-                    targets: 3,
+                    targets: 2, // Shift
+                    width: "30px",
+                    className: "text-center"
+                }, {
+                    targets: 3, // No KK
+                    width: "40px"
+                }, {
+                    targets: 4,
                     className: 'produk-wrap'
                 }]
             });
@@ -260,8 +288,389 @@
             browseDetail();
         });
 
+        $('#tblDetail').on('click', '.btn-detail-waktu', function() {
+            const row = tblDetail.row($(this).closest('tr')).data();
+
+            if (!row) {
+                return;
+            }
+
+            selectedDetailParam = {
+                // mesin: $('#select_mesin').val() || row.MESIN,
+                mesin: selectedMesin,
+                tanggal: row.TANGGAL_PARAM,
+                tanggal_display: row.TANGGAL,
+                shift: row.SHIFT_,
+                nomor_kk: row.NOMOR_KK,
+                proses: row.PROSES,
+                produk: row.PRODUK
+            };
+
+            // $('#modalDetailInfo').html(`
+            //     Mesin: <b>${selectedDetailParam.mesin}</b> |
+            //     Tanggal: <b>${formatDateDisplay(selectedDetailParam.tanggal)}</b> |
+            //     Shift: <b>${selectedDetailParam.shift}</b> |
+            //     KK: <b>${selectedDetailParam.nomor_kk}</b> |
+            //     Proses: <b>${selectedDetailParam.proses}</b>
+            // `);
+
+            var mesinText = page.find('#mesin option:selected').text();
+
+            page.find('#infoDetailLHP').html(`
+                Mesin: <span class="text-primary"><b>${mesinText}</b></span> &nbsp; |
+                Tanggal:  <span class="text-success"><b>${formatDateDisplay(selectedDetailParam.tanggal)}</b></span> &nbsp; |
+                Shift: <span class="text-info"><b>${selectedDetailParam.shift}</b></span> &nbsp; |                
+                Proses: <span class="text-warning"><b>${selectedDetailParam.proses}</b></span> &nbsp; | <br>
+                KK: <span class="text-danger"><b>${selectedDetailParam.nomor_kk}</b></span> &nbsp;
+                ( <span class="text-danger"><b>${selectedDetailParam.produk}</b></span> )
+            `);
+
+            $('#modalDetailWaktu').modal('show');
+
+            loadDetailWaktu();
+        });
+
+        function loadDetailWaktu() {
+            if (tblDetailWaktu !== null) {
+                tblDetailWaktu.ajax.reload(null, false);
+                return;
+            }
+
+            tblDetailWaktu = $('#tblDetailWaktu').DataTable({
+                processing: true,
+                searching: true,
+                paging: true,
+                ordering: true,
+                autoWidth: false,
+                responsive: false,
+                scrollX: false,
+                scrollCollapse: true,
+                pageLength: 25,
+
+                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-right'B>>" +
+                    "rt" +
+                    "<'row'<'col-sm-6'i><'col-sm-6'p>>",
+
+                buttons: [{
+                        text: '<i class="fa fa-file-excel-o"></i> &nbsp; Excel',
+                        extend: 'excelHtml5',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-file-pdf-o"></i> &nbsp; PDF',
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-refresh"></i> Refresh',
+                        className: 'btn btn-primary btn-sm',
+                        action: function() {
+                            browseDetail();
+                        }
+                    },
+                    {
+                        text: '<i class="fa fa-print"></i> &nbsp; Print',
+                        extend: 'print',
+                        className: 'btn btn-dark btn-sm'
+                    }
+                ],
+
+                // data: [],
+                ajax: {
+                    url: "<?= base_url('Monprod/get_detail_waktu') ?>",
+                    type: "POST",
+                    data: function(d) {
+                        d.mesin = selectedDetailParam.mesin;
+                        d.tanggal = selectedDetailParam.tanggal;
+                        d.shift = selectedDetailParam.shift;
+                        d.nomor_kk = selectedDetailParam.nomor_kk;
+                        d.proses = selectedDetailParam.proses;
+                    },
+                    dataSrc: ''
+                },
+                columns: [{
+                        data: 'NOMOR_LHP'
+                    },
+                    {
+                        data: 'NO_URUT_DETAIL',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'KEGIATAN'
+                    },
+                    {
+                        data: 'KTG_LOSSTIME'
+                    },
+                    {
+                        data: 'JAM1',
+                        className: 'text-center',
+                        render: function(data) {
+                            return formatDateTimeDisplay(data);
+                        }
+                    },
+                    {
+                        data: 'JAM2',
+                        className: 'text-center',
+                        render: function(data) {
+                            return formatDateTimeDisplay(data);
+                        }
+                    },
+                    {
+                        data: 'WAKTU_BLT',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatDecimal(data);
+                        }
+                    },
+                    {
+                        data: 'BAIK',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
+                    },
+                    {
+                        data: 'SAT_HASIL_BAIK'
+                    },
+                    {
+                        data: 'NAMA_WASTE'
+                    },
+                    {
+                        data: 'RUSAK',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
+                    },
+                    {
+                        data: 'SAT_HASIL_RUSAK'
+                    },
+                    {
+                        data: 'OUTPUT',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
+                    },
+                    {
+                        data: 'OPERATOR'
+                    },
+                    {
+                        data: 'PENGAWAS'
+                    }
+                ],
+                columnDefs: [{
+                        targets: 0, // NOMOR_LHP
+                        width: "40px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 1, // NO_URUT_DETAIL
+                        width: "40px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 6, // WAKTU
+                        width: "50px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold',
+                                'color': '#1e21ef'
+                            });
+                        }
+                    },
+                    {
+                        targets: 7, // BAIK
+                        width: "80px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold',
+                                'color': '#069144'
+                            });
+                        }
+                    },
+                    {
+                        targets: 8, // SAT BAIK
+                        width: "50px"
+                    },
+                    {
+                        targets: 10, // RUSAK
+                        width: "50px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold',
+                                'color': '#ed1c1c'
+                            });
+                        }
+                    },
+                    {
+                        targets: 11, // SAT RUSAK
+                        width: "50px"
+                    },
+                    {
+                        targets: 12, // OUTPUT
+                        width: "80px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold',
+                                'color': '#b507af'
+                            });
+                        }
+                    }
+                ],
+                footerCallback: function(row, data, start, end, display) {
+
+                    var api = this.api();
+
+                    function parseNumber(i) {
+                        return typeof i === 'string' ?
+                            parseFloat(i.toString().replace(/,/g, '')) || 0 :
+                            typeof i === 'number' ?
+                            i :
+                            0;
+                    }
+
+                    // WAKTU
+                    var totalWaktu = api
+                        .column(6, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    // BAIK
+                    var totalBaik = api
+                        .column(7, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    // RUSAK
+                    var totalRusak = api
+                        .column(10, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    // OUTPUT
+                    var totalOutput = api
+                        .column(12, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    $(api.column(6).footer()).html(formatNumber(totalWaktu));
+                    $(api.column(7).footer()).html(formatNumber(totalBaik));
+                    $(api.column(10).footer()).html(formatNumber(totalRusak));
+                    $(api.column(12).footer()).html(formatNumber(totalOutput));
+                }
+            });
+        }
+
         initSelect2();
         initDataTable();
+
+        function formatDateTimeMinute(value) {
+            if (!value) return '';
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).replace('T', ' ').substring(0, 16);
+
+            const parts = dateStr.split(' ');
+            if (parts.length < 2) return value;
+
+            const datePart = parts[0];
+            const timePart = parts[1];
+
+            const d = datePart.split('-');
+            if (d.length !== 3) return value;
+
+            return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
+        }
+
+        function formatDecimal(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+
+            return parseFloat(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+
+            return parseFloat(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatDateDisplay(value) {
+
+            if (!value) {
+                return '';
+            }
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).substring(0, 10);
+
+            const parts = dateStr.split('-');
+
+            if (parts.length !== 3) {
+                return value;
+            }
+
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+
+        function formatDateTimeDisplay(value) {
+            if (!value) return '';
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).replace('T', ' ').substring(0, 19);
+
+            let parts = dateStr.split(' ');
+            if (parts.length < 2) return value;
+
+            let datePart = parts[0];
+            let timePart = parts[1];
+
+            let d = datePart.split('-');
+            if (d.length !== 3) return value;
+
+            return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
+        }
 
     });
 </script>

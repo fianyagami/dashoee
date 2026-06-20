@@ -89,6 +89,7 @@ defined('EXIT__AUTO_MAX')      or define('EXIT__AUTO_MAX', 125); // highest auto
  */
 $GLOBALS['server'] = 'http://' . $_SERVER["SERVER_NAME"] . '/';
 $GLOBALS['project'] = 'dashoee';
+$GLOBALS['project_head'] = 'OEE';
 $GLOBALS['nama_project'] = 'Dashboard OEE';
 $GLOBALS['server_project'] = $_SERVER['DOCUMENT_ROOT'];
 $GLOBALS['assets'] = $GLOBALS['server'] . $GLOBALS['project'] . '/assets/';

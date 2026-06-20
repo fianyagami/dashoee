@@ -48,7 +48,7 @@ class Login extends CI_Controller
             $data = $this->m_login->cek_login($where)->row();
 
             //          SET USERNAME, DATA NAMA, DATA DEPARTMENT PRODUKSI, DATA DEPARTMENT USER
-            ini_set('session.gc_maxlifetime', 30 * 60);
+            // ini_set('session.gc_maxlifetime', 30 * 60);
             $this->session->set_userdata($GLOBALS['project'] . '-ID_USER', $data->ID_USER);
             $this->session->set_userdata($GLOBALS['project'] . '-USERNAME', $data->USERNAME);
             $this->session->set_userdata($GLOBALS['project'] . '-NAMA', $data->NAMA);

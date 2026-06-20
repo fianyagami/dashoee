@@ -7,10 +7,14 @@ class Monprod extends CI_Controller
     {
         parent::__construct();
         $this->load->model('Monprod_mod');
+        if (!$this->session->userdata($GLOBALS['project'] . '-ID_USER')) {
+            redirect(base_url('login'));
+        }
     }
 
     public function index()
     {
+        $data['judul']      = "Monitoring Produksi";
         $data['template']   = "Monprod_view";
         $data['js']         = "Monprod_script";
         $data['css']        = "Monprod_style";
@@ -39,7 +43,24 @@ class Monprod extends CI_Controller
             $mesin
         );
 
+        echo json_encode($data);
+    }
 
+    public function get_detail_waktu()
+    {
+        $mesin    = $this->input->post('mesin');
+        $tanggal  = $this->input->post('tanggal');
+        $shift    = $this->input->post('shift');
+        $nomor_kk = $this->input->post('nomor_kk');
+        $proses   = $this->input->post('proses');
+
+        $data = $this->Monprod_mod->get_detail_waktu(
+            $mesin,
+            $tanggal,
+            $shift,
+            $nomor_kk,
+            $proses
+        );
 
         echo json_encode($data);
     }

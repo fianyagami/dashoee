@@ -114,4 +114,44 @@
         line-height: 16px;
         border-radius: 20px;
     }
+
+    #page-dashoeekk .oee-panel-detail-link {
+        text-align: right;
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed #ddd;
+    }
+
+    #page-dashoeekk .oee-panel-detail-link a {
+        font-size: 14px;
+        font-weight: 600;
+        color: #05a73b;
+        text-decoration: none;
+    }
+
+    #page-dashoeekk .oee-panel-detail-link a:hover {
+        text-decoration: underline;
+    }
+
+    #page-dashoeekk .oee-panel-detail-link a.disabled {
+        color: #aaa;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    #page-dashoeekk~.modal .modal-detail-full,
+    .modal-detail-full {
+        width: 95vw;
+        max-width: 1600px;
+        margin: 20px auto;
+    }
+
+    .modal-detail-full .modal-body {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .modal-detail-full table.dataTable {
+        width: 100% !important;
+    }
 </style>

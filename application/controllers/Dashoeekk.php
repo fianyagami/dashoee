@@ -8,12 +8,17 @@ class Dashoeekk extends CI_Controller
     {
         parent::__construct();
         $this->load->model('Dashoeekk_mod');
+        if (!$this->session->userdata($GLOBALS['project'] . '-ID_USER')) {
+            redirect(base_url('login'));
+        }
     }
 
     public function index()
     {
         $data['tahun']      = date('Y');
         $data['bulan']      = date('n');
+
+        $data['judul']      = "OEE per KK";
         $data['template']   = "Dashoeekk_view";
         $data['js']         = "Dashoeekk_script";
         $data['css']        = "Dashoeekk_style";
@@ -53,5 +58,19 @@ class Dashoeekk extends CI_Controller
         );
 
         echo json_encode($result);
+    }
+
+    public function getDetailModal()
+    {
+        $type       = $this->input->post('type');
+        $tahun      = $this->input->post('tahun');
+        $bulan      = $this->input->post('bulan');
+        $kdmesin    = $this->input->post('kdmesin');
+        $nomor_kk   = $this->input->post('nomor_kk');
+        $tanggal_kk = $this->input->post('tanggal_kk');
+
+        $data = $this->Dashoeekk_mod->getDetailModal($type, $tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk);
+
+        echo json_encode(array('data' => $data));
     }
 }

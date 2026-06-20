@@ -7,6 +7,10 @@
         var page = $('#page-dashoeekk');
         if (page.length === 0) return;
 
+        var tblDetailAR = null;
+        var tblDetailQR = null;
+
+
         // DROPDOWN MESIN
         $('#mesin').select2({
             placeholder: 'Pilih Mesin',
@@ -79,25 +83,201 @@
             $('#nomor_kk').val(null).trigger('change');
         });
 
+        // TOMBOL CLEAR KK
+        $('#btnClearKK').click(function() {
+            $('#tahun_kk').val(<?= date('Y') ?>);
+            $('#nomor_kk').val(null).trigger('change');
+        });
+
         // KLIK BUTTON BROWSE
         $('#btnBrowse').click(function() {
             loadDashboard();
         });
 
+        // KLIK TOMBOL DETAIL MODAL
+        $(document).on('click', '.btn-detail-modal', function() {
+            if ($(this).hasClass('disabled')) return;
+
+            let type = $(this).data('type');
+            let target = $(this).data('target');
+
+            let mesinData = $('#mesin').select2('data')[0];
+            if (!mesinData) {
+                alert('Mesin wajib dipilih.');
+                return;
+            }
+
+            let kkData = $('#nomor_kk').select2('data')[0] || null;
+
+            $(target).modal('show');
+            loadDetailModal(type, target, mesinData, kkData);
+        });
+
+        function loadDetailModal(type, target, mesinData, kkData) {
+            $.ajax({
+                url: '<?= site_url("Dashoeekk/getDetailModal") ?>',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    type: type,
+                    tahun: $('#tahun').val(),
+                    bulan: $('#bulan').val(),
+                    kdmesin: mesinData.kdmesin,
+                    nomor_kk: kkData ? kkData.nomor_kk : '',
+                    tanggal_kk: kkData ? kkData.tanggal_kk : ''
+                },
+                beforeSend: function() {
+                    $(target).find('tbody').html(
+                        '<tr><td colspan="20" class="text-center"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>'
+                    );
+                },
+                success: function(res) {
+                    if (type === 'AR') {
+                        renderDetailAR(res.data);
+                    } else if (type === 'QR') {
+                        renderDetailQR(res.data);
+                    }
+                },
+                error: function() {
+                    $(target).find('tbody').html(
+                        '<tr><td colspan="20" class="text-center">Gagal mengambil data.</td></tr>'
+                    );
+                }
+            });
+        }
+
+        function renderDetailAR(data) {
+            if (tblDetailAR) {
+                tblDetailAR.destroy();
+                $('#tblDetailAR tbody').empty();
+            }
+
+            tblDetailAR = $('#tblDetailAR').DataTable({
+                data: data,
+                columns: [{
+                        data: 'NOMOR_LHP'
+                    },
+                    {
+                        data: 'NO_URUT_DETAIL'
+                    },
+                    {
+                        data: 'NOMOR_KK'
+                    },
+                    {
+                        data: 'PRODUK'
+                    },
+                    {
+                        data: 'SHIFT_'
+                    },
+                    {
+                        data: 'KEGIATAN'
+                    },
+                    {
+                        data: 'KTG_LOSSTIME'
+                    },
+                    {
+                        data: 'JAM1'
+                    },
+                    {
+                        data: 'JAM2'
+                    },
+                    {
+                        data: 'WAKTU_BLT_ASLI'
+                    },
+                    {
+                        data: 'WAKTU_BLT'
+                    },
+                    {
+                        data: 'LIMITPLAN'
+                    },
+                    {
+                        data: 'PAR_LIMITPLAN'
+                    }
+                ],
+                scrollX: true,
+                autoWidth: false,
+                pageLength: 25,
+                language: {
+                    emptyTable: 'Tidak ada data'
+                }
+            });
+        }
+
+        function renderDetailQR(data) {
+            if (tblDetailQR) {
+                tblDetailQR.destroy();
+                $('#tblDetailQR tbody').empty();
+            }
+
+            tblDetailQR = $('#tblDetailQR').DataTable({
+                data: data,
+                columns: [{
+                        data: 'NOMOR_LHP'
+                    },
+                    {
+                        data: 'NO_URUT_DETAIL'
+                    },
+                    {
+                        data: 'NOMOR_KK'
+                    },
+                    {
+                        data: 'PRODUK'
+                    },
+                    {
+                        data: 'SHIFT_'
+                    },
+                    {
+                        data: 'KEGIATAN'
+                    },
+                    {
+                        data: 'BAIK'
+                    },
+                    {
+                        data: 'SAT_HASIL_BAIK'
+                    },
+                    {
+                        data: 'KODE_WASTE'
+                    },
+                    {
+                        data: 'NAMA_WASTE'
+                    },
+                    {
+                        data: 'RUSAK'
+                    },
+                    {
+                        data: 'SAT_HASIL_RUSAK'
+                    },
+                    {
+                        data: 'OUTPUT'
+                    }
+                ],
+                scrollX: true,
+                autoWidth: false,
+                pageLength: 25,
+                language: {
+                    emptyTable: 'Tidak ada data'
+                }
+            });
+        }
+
         function loadDashboard() {
             let mesinData = $('#mesin').select2('data')[0];
-            let kkData = $('#nomor_kk').select2('data')[0];
+            let kkData = $('#nomor_kk').select2('data')[0] || null;
 
-            if (!mesinData || !kkData) {
-                alert('Mesin dan Nomor KK wajib dipilih.');
+            // if (!mesinData || !kkData) {
+            //     alert('Mesin dan Nomor KK wajib dipilih.');
+            //     return;
+            // }
+            if (!mesinData) {
+                alert('Mesin wajib dipilih.');
                 return;
             }
 
             console.log('tahun:', $('#tahun').val());
             console.log('bulan:', $('#bulan').val());
             console.log('kdmesin:', mesinData.kdmesin);
-            console.log('nomor_kk:', kkData.nomor_kk);
-            console.log('tanggal_kk:', kkData.tanggal_kk);
+            // console.log('nomor_kk:', kkData.nomor_kk);
+            // console.log('tanggal_kk:', kkData.tanggal_kk);
 
             $.ajax({
                 url: '<?= site_url("Dashoeekk/getDashboard") ?>',
@@ -107,13 +287,13 @@
                     tahun: $('#tahun').val(),
                     bulan: $('#bulan').val(),
                     kdmesin: mesinData.kdmesin,
-                    nomor_kk: kkData.nomor_kk,
-                    tanggal_kk: kkData.tanggal_kk
+                    nomor_kk: kkData ? kkData.nomor_kk : '',
+                    tanggal_kk: kkData ? kkData.tanggal_kk : ''
                 },
                 beforeSend: function() {
                     page.find('#loadingDashboardKK').show();
 
-                    page.find('#btnBrowseMonprod').prop('disabled', true).html(
+                    page.find('#btnBrowse').prop('disabled', true).html(
                         '<i class="fa fa-spinner fa-spin"></i> Loading...'
                     );
 
@@ -122,17 +302,34 @@
                 success: function(res) {
                     let s = res.summary;
 
+                    let subTitle = kkData ?
+                        kkData.nomor_kk + ' - ' + kkData.nama_barang :
+                        'Semua KK';
+
                     $('#dashboardTitle').html(
                         '<div class="dashboard-title-main">Dashboard OEE - ' + mesinData.mesin + '</div>' +
-                        '<div class="dashboard-title-sub">' + kkData.nomor_kk + ' - ' + kkData.nama_barang + '</div>'
+                        '<div class="dashboard-title-sub">' + subTitle + '</div>'
                     );
 
                     renderGauge('chartAR', 'Availability', parseFloat(s.AR), parseFloat(s.TARGET_AR));
                     renderGauge('chartPR', 'Performance', parseFloat(s.PR), parseFloat(s.TARGET_PR));
                     renderGauge('chartQR', 'Quality', parseFloat(s.QR), parseFloat(s.TARGET_QR));
 
-                    renderBarHorizontal('chartDowntime', 'Top 5 Downtime', res.downtime, 'KEGIATAN', 'PERSEN', '%');
-                    renderBarHorizontal('chartDefect', 'Top 5 Defect', res.defect, 'KEGIATAN', 'JUMLAH', '');
+                    // renderBarHorizontal('chartDowntime', 'Top 5 Unplanned Downtime', res.downtime, 'KEGIATAN', 'PERSEN', '%');
+                    // renderBarHorizontal('chartDefect', 'Top 5 Defect', res.defect, 'KEGIATAN', 'JUMLAH', '');
+                    renderBarHorizontal('chartDowntime', 'Top 5 Unplanned Downtime', res.downtime, 'KEGIATAN', 'PERSEN', '%', [{
+                            label: 'Jumlah Downtime (kali)',
+                            field: 'FREQ_DOWNTIME'
+                        },
+                        {
+                            label: 'Total Jam Downtime (Jam)',
+                            field: 'WAKTU_DOWNTIME'
+                        }
+                    ]);
+                    renderBarHorizontal('chartDefect', 'Top 5 Defect', res.defect, 'KEGIATAN', 'PERSEN', '%', [{
+                        label: 'Jumlah Defect (Satuan dalam Proses)',
+                        field: 'JUMLAH'
+                    }]);
                     renderActualTarget(res.actual_target);
 
                     let ar = parseFloat(s.AR || 0);
@@ -164,7 +361,7 @@
                 complete: function() {
                     page.find('#loadingDashboardKK').hide();
 
-                    page.find('#btnBrowseMonprod').prop('disabled', false).html(
+                    page.find('#btnBrowse').prop('disabled', false).html(
                         '<i class="fa fa-search"></i> Browse'
                     );
                 }
@@ -187,7 +384,11 @@
         }
 
         function renderGauge(id, title, value, target) {
-            let chart = echarts.init(document.getElementById(id));
+            // let chart = echarts.init(document.getElementById(id));
+            let dom = document.getElementById(id);
+            let chart = echarts.getInstanceByDom(dom);
+            if (chart) chart.dispose();
+            chart = echarts.init(dom);
 
             let gaugeColor = value >= target ? '#008000' : '#ff0000';
 
@@ -228,24 +429,30 @@
                 }]
             });
 
-            window.addEventListener('resize', function() {
-                chart.resize();
-            });
+            // window.addEventListener('resize', function() {
+            //     chart.resize();
+            // });
         }
 
-        function renderBarHorizontal(id, title, data, labelField, valueField, suffix) {
-            let chart = echarts.init(document.getElementById(id));
+        function renderBarHorizontal(id, title, data, labelField, valueField, suffix, extraFields) {
+            let dom = document.getElementById(id);
+            let chart = echarts.getInstanceByDom(dom);
+            if (chart) chart.dispose();
+            chart = echarts.init(dom);
 
             let labels = [];
             let values = [];
+            let rawRows = [];
 
             data.forEach(function(row) {
                 labels.push(row[labelField]);
                 values.push(parseFloat(row[valueField] || 0));
+                rawRows.push(row);
             });
 
             labels = labels.reverse();
             values = values.reverse();
+            rawRows = rawRows.reverse();
 
             let colors = getRandomColors(values.length);
 
@@ -259,6 +466,22 @@
                     trigger: 'axis',
                     axisPointer: {
                         type: 'shadow'
+                    },
+                    formatter: function(params) {
+                        let idx = params[0].dataIndex;
+                        let row = rawRows[idx];
+
+                        let html = '<b>' + labels[idx] + '</b><br/>';
+                        html += params[0].seriesName + ': ' + values[idx] + suffix + '<br/>';
+
+                        if (extraFields) {
+                            extraFields.forEach(function(f) {
+                                let val = row[f.field];
+                                html += f.label + ': ' + (val !== undefined && val !== null ? val : '-') + (f.suffix || '') + '<br/>';
+                            });
+                        }
+
+                        return html;
                     }
                 },
                 grid: {
@@ -276,6 +499,7 @@
                 },
                 series: [{
                     type: 'bar',
+                    name: title,
                     data: values.map(function(value, index) {
                         return {
                             value: value,
@@ -292,11 +516,17 @@
                 }]
             });
 
-            chart.resize();
+            setTimeout(function() {
+                chart.resize();
+            }, 50);
         }
 
         function renderActualTarget(data) {
-            let chart = echarts.init(document.getElementById('chartActualTarget'));
+            // let chart = echarts.init(document.getElementById('chartActualTarget'));
+            let dom = document.getElementById('chartActualTarget');
+            let chart = echarts.getInstanceByDom(dom);
+            if (chart) chart.dispose();
+            chart = echarts.init(dom);
 
             chart.setOption({
                 title: {
@@ -334,9 +564,9 @@
                 }]
             });
 
-            window.addEventListener('resize', function() {
-                chart.resize();
-            });
+            // window.addEventListener('resize', function() {
+            //     chart.resize();
+            // });
         }
 
         function getOeeStatus(oee) {
@@ -359,6 +589,14 @@
             $('#progressPR').css('width', Math.min(pr, 100) + '%');
             $('#progressQR').css('width', Math.min(qr, 100) + '%');
         }
+
+        // RESIZE HANDLER — cukup 1x, handle semua chart sekaligus
+        window.addEventListener('resize', function() {
+            ['chartAR', 'chartPR', 'chartQR', 'chartDowntime', 'chartDefect', 'chartActualTarget'].forEach(function(id) {
+                let instance = echarts.getInstanceByDom(document.getElementById(id));
+                if (instance) instance.resize();
+            });
+        });
 
     });
 </script>

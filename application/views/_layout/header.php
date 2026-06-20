@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="<?= base_url() ?>assets/images/pura_logo.ico" type="image/ico" />
-    <title><?= $GLOBALS['nama_project'] ?> </title>
+    <title><?= $GLOBALS['project_head'] ?> - <?= isset($judul) ? $judul : ''; ?> </title>
 
     <!-- Bootstrap -->
     <link href="<?= $GLOBALS['assets'] ?>vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -41,7 +41,51 @@
 
     <style>
         body {
-            zoom: 80%;
+            zoom: 90%;
+        }
+
+        .project-title {
+            height: auto !important;
+            white-space: normal !important;
+            line-height: 25px;
+            padding: 10px;
+        }
+
+        .project-title span {
+            display: inline-block;
+            white-space: normal !important;
+            word-wrap: break-word;
+            max-width: 160px;
+            vertical-align: middle;
+        }
+
+        .x_title h2 {
+            font-weight: bold;
+            color: #2A3F54;
+        }
+
+        /*===( Tabel secara General )=== */
+        .table thead tr:first-child th {
+            /* .table thead th th.main-header th.group-header { */
+            background: #2A3F54 !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .table tbody tr.row-selected {
+            background-color: #27db93 !important;
+            font-weight: bold;
+        }
+
+        .table.dataTable tbody tr {
+            cursor: pointer;
+        }
+
+        .table tbody td {
+            padding: 6px 8px !important;
         }
 
         /* HEADER DATATABLE */
@@ -58,6 +102,51 @@
         table.dataTable thead input {
             font-size: 11px;
             font-weight: normal;
+        }
+
+        /* == */
+        #tblDetail {
+            width: 100% !important;
+        }
+
+        #tblDetail th,
+        #tblDetail td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        #tblDetail thead input {
+            width: 100%;
+            min-width: 70px;
+            font-size: 11px;
+            padding: 3px;
+        }
+
+        #tblProjek tbody tr.selected {
+            background: #1ABB9C !important;
+            color: white;
+        }
+
+        .filter-row input {
+            width: 100%;
+            min-width: 70px;
+            font-size: 11px;
+            padding: 3px;
+        }
+
+        /* Button Browse */
+        .btn-cari {
+            background: #26B99A;
+            border: 1px solid #169F85;
+            color: #FFF;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn-cari:hover {
+            background: #169F85;
+            border-color: #148F77;
+            color: #FFF;
         }
     </style>
 
