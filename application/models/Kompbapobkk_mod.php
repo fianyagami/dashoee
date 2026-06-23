@@ -53,6 +53,14 @@ class Kompbapobkk_mod extends CI_Model
             WHERE NOMOR_KK = ?
               AND TAHUN = ?
               AND TRUNC(TANGGAL_KK) = TO_DATE(?, 'YYYY-MM-DD')
+            GROUP BY
+                URUT,
+                URUT_FLOW,
+                NAMA_PROSES,
+                NAMA_MESIN,
+                WASTE_PROSES,
+                TARGET,
+                SAT_TARGET
             ORDER BY URUT, URUT_FLOW
         ";
 

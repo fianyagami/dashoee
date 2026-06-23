@@ -139,7 +139,9 @@
         pointer-events: none;
     }
 
-    #page-dashoeekk~.modal .modal-detail-full,
+    /* MODAL */
+
+    /* #page-dashoeekk~.modal .modal-detail-full,
     .modal-detail-full {
         width: 95vw;
         max-width: 1600px;
@@ -153,5 +155,81 @@
 
     .modal-detail-full table.dataTable {
         width: 100% !important;
+    } */
+
+    .table-dashoeekk {
+        width: 100% !important;
+        table-layout: fixed;
     }
+
+    .table-dashoeekk th,
+    .table-dashoeekk td {
+        white-space: normal !important;
+        word-wrap: break-word;
+        vertical-align: top;
+        font-size: 13px;
+        padding: 5px 6px !important;
+    }
+
+    .table-dashoeekk th {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
+    .table-dashoeekk td.text-right {
+        text-align: right;
+    }
+
+    .table-dashoeekk td.text-center {
+        text-align: center;
+    }
+
+
+    .modal-dashoeekk .modal-dialog {
+        width: 98%;
+        max-width: 98%;
+    }
+
+    .modal-dashoeekk .modal-body {
+        overflow-x: hidden;
+    }
+
+    .modal-dashoeekk .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-dashoeekk .modal-title {
+        margin: 0;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .modal-dashoeekk .close {
+        margin: 0;
+        color: #fff;
+        opacity: 1;
+    }
+
+    /* MODAL */
+
+    /* filter row */
+    #tblDetailAR thead tr.filter-row input,
+    #tblDetailQR thead tr.filter-row input {
+        width: 100%;
+        min-width: 50px;
+        font-size: 11px;
+        padding: 2px 4px;
+        height: 26px;
+        box-sizing: border-box;
+    }
+
+    #tblDetailAR thead tr.filter-row td,
+    #tblDetailQR thead tr.filter-row td {
+        padding: 4px 4px;
+        background: #f9f9f9;
+    }
+
+    /* filter row */
 </style>

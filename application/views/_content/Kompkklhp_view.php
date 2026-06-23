@@ -1,11 +1,11 @@
 <?php defined('_HOME') or exit('No direct script access allowed'); ?>
 
-<div id="page-kompbapobkk">
+<div id="page-kompkklhp">
     <div class="x_content">
         <div class="body">
 
             <div class="x_title">
-                <h2>Komparasi BAPOB dan KK</h2>
+                <h2>Komparasi KK dan LHP</h2>
                 <div class="clearfix"></div>
             </div>
 
@@ -47,8 +47,8 @@
                             </div>
 
                             <div class="info-selected">
-                                <h2 id="info_kk_bapob">NO BAPOB: -</h2>
                                 <h2 id="info_kk_barang">PRODUK: -</h2>
+                                <h2 id="info_kk_customer">CUSTOMER: -</h2>
                             </div>
 
                             <div class="table-responsive">
@@ -72,47 +72,31 @@
                     </div>
                 </div>
 
-                <!-- PANEL BAPOB -->
+                <!-- PANEL LHP -->
                 <div class="col-md-6 col-sm-12 col-xs-12">
                     <div class="x_panel">
                         <div class="x_title">
-                            <h2 style="color:orange;">Data BAPOB</h2>
+                            <h2 style="color: green;">Data LHP (Laporan Harian Produksi)</h2>
                             <div class="clearfix"></div>
                         </div>
 
                         <div class="x_content">
 
-                            <div class="form-group">
-                                <label>Tahun BAPOB</label>
-                                <select id="thn_bapob" class="form-control">
-                                    <?php for ($i = 2021; $i <= 2027; $i++) { ?>
-                                        <option value="<?= $i ?>" <?= $i == date('Y') ? 'selected' : '' ?>>
-                                            <?= $i ?>
-                                        </option>
-                                    <?php } ?>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>No BAPOB</label>
-                                <select id="select_bapob" class="form-control" style="width:100%;"></select>
-                            </div>
-
                             <div class="info-selected">
-                                <h2 id="info_bapob_produk">PRODUK: -</h2>
-                                <h2 id="info_bapob_dibuat">PLATFORM: -</h2>
+                                <h2 id="info_lhp_nomor">NOMOR KK: -</h2>
+                                <h2 id="info_lhp_barang">PRODUK: -</h2>
+                                <h2 id="info_lhp_status">STATUS: -</h2>
                             </div>
 
                             <div class="table-responsive">
-                                <table id="tblbapob" class="table table-bordered table-striped table-hover" width="100%">
+                                <table id="tbllhp" class="table table-bordered table-striped table-hover" width="100%">
                                     <thead>
                                         <tr>
-                                            <th>URUT SUB</th>
-                                            <th>NAMA SUB</th>
-                                            <th>URUTAN PROSES</th>
-                                            <th>NAMA PROSES</th>
-                                            <th>NAMA MESIN</th>
-                                            <th>TARGET SPEED</th>
+                                            <th>URUT PROSES</th>
+                                            <th>PROSES</th>
+                                            <th>TOT WAKTU</th>
+                                            <th>TOT BAIK</th>
+                                            <th>TOT RUSAK</th>
                                         </tr>
                                     </thead>
                                     <tbody></tbody>

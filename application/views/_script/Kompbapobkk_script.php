@@ -173,11 +173,17 @@
                     },
                     {
                         data: 'WASTE_PROSES',
-                        className: 'wordwrap'
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
                     },
                     {
                         data: 'TARGET',
-                        className: 'text-right'
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
                     },
                     {
                         data: 'SAT_TARGET',
@@ -460,6 +466,17 @@
                 .replace(/\bTBK\b/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+
+            return parseFloat(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
         }
 
     });

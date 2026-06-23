@@ -243,19 +243,22 @@
         </div>
     </div>
     <!-- MODAL DETAIL AR -->
-    <div class="modal fade" id="modalDetailAR" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-detail-full" role="document">
+    <div class="modal fade modal-dashoeekk" id="modalDetailAR" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" style="width: 95%;">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <div class="modal-header bg-primary text-white">
                     <h4 class="modal-title">Detail Data - Availability Rate</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="table-responsive">
-                        <table id="tblDetailAR" class="table table-bordered table-striped" style="width:100%">
+                        <table id="tblDetailAR" class="table table-bordered table-striped table-dashoeekk" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>No LHP</th>
+                                    <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nomor KK</th>
                                     <th>Produk</th>
@@ -264,13 +267,20 @@
                                     <th>Kategori Losstime</th>
                                     <th>Jam Mulai</th>
                                     <th>Jam Selesai</th>
-                                    <th>Waktu Asli</th>
-                                    <th>Waktu (Fix)</th>
-                                    <th>Limit Plan</th>
+                                    <th>Waktu Asli (Jam)</th>
+                                    <th>Waktu Fix (Jam)</th>
+                                    <th>Limit Plan (Jam)</th>
                                     <th>Par Limit Plan</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="11" style="text-align:right">Total Jam Kerja :</th>
+                                    <th></th>
+                                    <th colspan="2"></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -282,19 +292,22 @@
     </div>
 
     <!-- MODAL DETAIL QR -->
-    <div class="modal fade" id="modalDetailQR" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-detail-full" role="document">
+    <div class="modal fade modal-dashoeekk" id="modalDetailQR" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" style="width: 95%;">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+
+                <div class="modal-header bg-primary text-white">
                     <h4 class="modal-title">Detail Data - Quality Rate</h4>
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="table-responsive">
-                        <table id="tblDetailQR" class="table table-bordered table-striped" style="width:100%">
+                        <table id="tblDetailQR" class="table table-bordered table-striped table-dashoeekk" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>No LHP</th>
+                                    <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nomor KK</th>
                                     <th>Produk</th>
@@ -302,7 +315,6 @@
                                     <th>Kegiatan</th>
                                     <th>Baik</th>
                                     <th>Satuan Baik</th>
-                                    <th>Kode Waste</th>
                                     <th>Nama Waste</th>
                                     <th>Rusak</th>
                                     <th>Satuan Rusak</th>
@@ -310,6 +322,16 @@
                                 </tr>
                             </thead>
                             <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="7" style="text-align:right">Total Hasil :</th>
+                                    <th></th>
+                                    <th colspan="2"></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>

@@ -147,27 +147,66 @@
         }
 
         function renderDetailAR(data) {
-            if (tblDetailAR) {
-                tblDetailAR.destroy();
-                $('#tblDetailAR tbody').empty();
+            // Destroy dengan cara yang aman — cek via $.fn.DataTable.isDataTable
+            if ($.fn.DataTable.isDataTable('#tblDetailAR')) {
+                $('#tblDetailAR').DataTable().destroy();
             }
+            $('#tblDetailAR tbody').empty();
 
             tblDetailAR = $('#tblDetailAR').DataTable({
                 data: data,
+                processing: true,
+                searching: true,
+                paging: true,
+                ordering: true,
+                autoWidth: false,
+                responsive: false,
+                scrollX: true,
+                scrollCollapse: true,
+                pageLength: 10,
+
+                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-right'B>>" +
+                    "rt" +
+                    "<'row'<'col-sm-6'i><'col-sm-6'p>>",
+
+                buttons: [{
+                        text: '<i class="fa fa-file-excel-o"></i> &nbsp; Excel',
+                        extend: 'excelHtml5',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-file-pdf-o"></i> &nbsp; PDF',
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-print"></i> &nbsp; Print',
+                        extend: 'print',
+                        className: 'btn btn-dark btn-sm'
+                    }
+                ],
+
                 columns: [{
-                        data: 'NOMOR_LHP'
+                        data: 'NOMOR_LHP',
+                        className: 'text-center'
                     },
                     {
-                        data: 'NO_URUT_DETAIL'
+                        data: 'TANGGAL'
                     },
                     {
-                        data: 'NOMOR_KK'
+                        data: 'NO_URUT_DETAIL',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'NOMOR_KK',
+                        className: 'text-center'
                     },
                     {
                         data: 'PRODUK'
                     },
                     {
-                        data: 'SHIFT_'
+                        data: 'SHIFT_',
+                        className: 'text-center'
                     },
                     {
                         data: 'KEGIATAN'
@@ -176,86 +215,409 @@
                         data: 'KTG_LOSSTIME'
                     },
                     {
-                        data: 'JAM1'
+                        data: 'JAM1',
+                        className: 'text-center',
+                        render: function(data) {
+                            return formatDateTimeDisplay(data);
+                        }
                     },
                     {
-                        data: 'JAM2'
+                        data: 'JAM2',
+                        className: 'text-center',
+                        render: function(data) {
+                            return formatDateTimeDisplay(data);
+                        }
                     },
                     {
-                        data: 'WAKTU_BLT_ASLI'
+                        data: 'WAKTU_BLT_ASLI',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatDecimal(data);
+                        }
                     },
                     {
-                        data: 'WAKTU_BLT'
+                        data: 'WAKTU_BLT',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatDecimal(data);
+                        }
                     },
                     {
-                        data: 'LIMITPLAN'
+                        data: 'LIMITPLAN',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatDecimal(data);
+                        }
                     },
                     {
-                        data: 'PAR_LIMITPLAN'
+                        data: 'PAR_LIMITPLAN',
+                        className: 'text-center'
                     }
                 ],
-                scrollX: true,
-                autoWidth: false,
-                pageLength: 25,
+                columnDefs: [{
+                        targets: 0, // NOMOR_LHP
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 1, // TANGGAL
+                        width: "90px"
+                    },
+                    {
+                        targets: 2, // NO_URUT_DETAIL
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 3, // NOMOR_KK
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 5, // SHIFT_
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 10, // WAKTU_ASLI
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                    {
+                        targets: 11, // WAKTU_BLT
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                    {
+                        targets: 12, // LIMIT_PLAN
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                ],
+                // scrollX: true,
+                // autoWidth: false,
+                // pageLength: 25,
                 language: {
                     emptyTable: 'Tidak ada data'
+                },
+                rowCallback: function(row, data) {
+                    if (data.KEGIATAN && data.KEGIATAN.indexOf('OVER - ') === 0) {
+                        $(row).css('color', 'red');
+                    }
+                },
+                footerCallback: function(row, data, start, end, display) {
+
+                    var api = this.api();
+
+                    function parseNumber(i) {
+                        return typeof i === 'string' ?
+                            parseFloat(i.toString().replace(/,/g, '')) || 0 :
+                            typeof i === 'number' ?
+                            i :
+                            0;
+                    }
+
+                    // WAKTU_BLT
+                    var totalWaktu = api
+                        .column(11, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+
+                    $(api.column(11).footer()).html(formatNumber(totalWaktu));
                 }
             });
+
+            buildFilterRow('tblDetailAR', tblDetailAR);
         }
 
         function renderDetailQR(data) {
-            if (tblDetailQR) {
-                tblDetailQR.destroy();
-                $('#tblDetailQR tbody').empty();
+            // Destroy dengan cara yang aman — cek via $.fn.DataTable.isDataTable
+            if ($.fn.DataTable.isDataTable('#tblDetailQR')) {
+                $('#tblDetailQR').DataTable().destroy();
             }
+            $('#tblDetailQR tbody').empty();
 
             tblDetailQR = $('#tblDetailQR').DataTable({
                 data: data,
+                processing: true,
+                searching: true,
+                paging: true,
+                ordering: true,
+                autoWidth: false,
+                responsive: false,
+                scrollX: true,
+                scrollCollapse: true,
+                pageLength: 10,
+
+                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-right'B>>" +
+                    "rt" +
+                    "<'row'<'col-sm-6'i><'col-sm-6'p>>",
+
+                buttons: [{
+                        text: '<i class="fa fa-file-excel-o"></i> &nbsp; Excel',
+                        extend: 'excelHtml5',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-file-pdf-o"></i> &nbsp; PDF',
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm'
+                    },
+                    {
+                        text: '<i class="fa fa-print"></i> &nbsp; Print',
+                        extend: 'print',
+                        className: 'btn btn-dark btn-sm'
+                    }
+                ],
+
                 columns: [{
-                        data: 'NOMOR_LHP'
+                        data: 'NOMOR_LHP',
+                        className: 'text-center'
                     },
                     {
-                        data: 'NO_URUT_DETAIL'
+                        data: 'TANGGAL'
                     },
                     {
-                        data: 'NOMOR_KK'
+                        data: 'NO_URUT_DETAIL',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'NOMOR_KK',
+                        className: 'text-center'
                     },
                     {
                         data: 'PRODUK'
                     },
                     {
-                        data: 'SHIFT_'
+                        data: 'SHIFT_',
+                        className: 'text-center'
                     },
                     {
                         data: 'KEGIATAN'
                     },
                     {
-                        data: 'BAIK'
+                        data: 'BAIK',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
                     },
                     {
                         data: 'SAT_HASIL_BAIK'
                     },
                     {
-                        data: 'KODE_WASTE'
-                    },
-                    {
                         data: 'NAMA_WASTE'
                     },
                     {
-                        data: 'RUSAK'
+                        data: 'RUSAK',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
                     },
                     {
                         data: 'SAT_HASIL_RUSAK'
                     },
                     {
-                        data: 'OUTPUT'
+                        data: 'OUTPUT',
+                        className: 'text-right',
+                        render: function(data) {
+                            return formatNumber(data);
+                        }
                     }
                 ],
-                scrollX: true,
-                autoWidth: false,
-                pageLength: 25,
+                columnDefs: [{
+                        targets: 0, // NOMOR_LHP
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 1, // TANGGAL
+                        width: "90px"
+                    },
+                    {
+                        targets: 2, // NO_URUT_DETAIL
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 3, // NOMOR_KK
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 5, // SHIFT_
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 7, // BAIK
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                    {
+                        targets: 8, // SAT_HASIL_BAIK
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 9, // NAMA_WASTE
+                        width: "210px"
+                    },
+                    {
+                        targets: 10, // RUSAK
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                    {
+                        targets: 11, // SAT_HASIL_RUSAK
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 12, // OUTPUT
+                        width: "70px",
+                        createdCell: function(td, cellData, rowData, row, col) {
+                            $(td).css({
+                                'font-weight': 'bold'
+                                // 'color': '#1e21ef'
+                            });
+                        }
+                    },
+                ],
+                // scrollX: true,
+                // autoWidth: false,
+                // pageLength: 25,
                 language: {
                     emptyTable: 'Tidak ada data'
+                },
+                rowCallback: function(row, data) {
+                    if (data.KEGIATAN && data.KEGIATAN.indexOf('PRODUKSI MURNI') === 0) {
+                        $(row).css('color', 'green');
+                    }
+                },
+                footerCallback: function(row, data, start, end, display) {
+
+                    var api = this.api();
+
+                    function parseNumber(i) {
+                        return typeof i === 'string' ?
+                            parseFloat(i.toString().replace(/,/g, '')) || 0 :
+                            typeof i === 'number' ?
+                            i :
+                            0;
+                    }
+
+                    // BAIK
+                    var totalBaik = api
+                        .column(7, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    // RUSAK
+                    var totalRusak = api
+                        .column(10, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    // OUTPUT
+                    var totalOutput = api
+                        .column(12, {
+                            search: 'applied'
+                        })
+                        .data()
+                        .reduce(function(a, b) {
+                            return parseNumber(a) + parseNumber(b);
+                        }, 0);
+
+                    $(api.column(7).footer()).html(formatNumber(totalBaik));
+                    $(api.column(10).footer()).html(formatNumber(totalRusak));
+                    $(api.column(12).footer()).html(formatNumber(totalOutput));
+                }
+            });
+
+            buildFilterRow('tblDetailQR', tblDetailQR);
+        }
+
+        function buildFilterRow(tableId, dtInstance) {
+            // Dengan scrollX, DataTables membuat clone thead di div.dataTables_scrollHead
+            // Kita harus append filter row ke clone thead tersebut, bukan thead asli
+
+            var wrapper = $('#' + tableId).closest('.dataTables_wrapper');
+            var scrollHeadTable = wrapper.find('.dataTables_scrollHead table thead');
+
+            // Hapus filter row lama kalau ada
+            scrollHeadTable.find('tr.filter-row').remove();
+
+            // Buat filter row
+            var filterRow = $('<tr class="filter-row"></tr>');
+
+            dtInstance.columns().every(function(colIdx) {
+                var column = this;
+                $('<td>')
+                    .appendTo(filterRow)
+                    .append(
+                        $('<input>', {
+                            type: 'text',
+                            placeholder: 'Cari...',
+                            class: 'form-control input-sm',
+                            'data-col': colIdx
+                        }).on('input', function() {
+                            column.search(this.value).draw(false);
+                        })
+                    );
+            });
+
+            scrollHeadTable.append(filterRow);
+
+            // Setiap draw, re-append ke scrollHead (bukan thead asli)
+            dtInstance.on('draw.filterRow', function() {
+                var scrollHead = wrapper.find('.dataTables_scrollHead table thead');
+                if (scrollHead.find('tr.filter-row').length === 0) {
+                    // Restore nilai search yang sudah ada sebelumnya
+                    filterRow.find('input').each(function() {
+                        var colIdx = $(this).data('col');
+                        $(this).val(dtInstance.column(colIdx).search());
+                    });
+                    scrollHead.append(filterRow);
                 }
             });
         }
@@ -588,6 +950,97 @@
             $('#progressAR').css('width', Math.min(ar, 100) + '%');
             $('#progressPR').css('width', Math.min(pr, 100) + '%');
             $('#progressQR').css('width', Math.min(qr, 100) + '%');
+        }
+
+        function formatDateTimeMinute(value) {
+            if (!value) return '';
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).replace('T', ' ').substring(0, 16);
+
+            const parts = dateStr.split(' ');
+            if (parts.length < 2) return value;
+
+            const datePart = parts[0];
+            const timePart = parts[1];
+
+            const d = datePart.split('-');
+            if (d.length !== 3) return value;
+
+            return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
+        }
+
+        function formatDecimal(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+
+            return parseFloat(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return '0';
+            }
+
+            return parseFloat(value).toLocaleString('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatDateDisplay(value) {
+
+            if (!value) {
+                return '';
+            }
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).substring(0, 10);
+
+            const parts = dateStr.split('-');
+
+            if (parts.length !== 3) {
+                return value;
+            }
+
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+
+        function formatDateTimeDisplay(value) {
+            if (!value) return '';
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).replace('T', ' ').substring(0, 19);
+
+            let parts = dateStr.split(' ');
+            if (parts.length < 2) return value;
+
+            let datePart = parts[0];
+            let timePart = parts[1];
+
+            let d = datePart.split('-');
+            if (d.length !== 3) return value;
+
+            return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
         }
 
         // RESIZE HANDLER — cukup 1x, handle semua chart sekaligus

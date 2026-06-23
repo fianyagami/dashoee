@@ -135,16 +135,25 @@ class Dashoeekk_mod extends CI_Model
         WITH base AS (
             SELECT
                 m.*,
-                lp.LIMITPLAN,
+                CASE
+                    WHEN TRIM(UPPER(m.KEGIATAN)) = 'ISHOMA'
+                        AND TO_CHAR(m.TANGGAL, 'D') = '6'
+                        AND m.SHIFT_ = '1'
+                    THEN 1.5
+                    ELSE lp.LIMITPLAN
+                END AS LIMITPLAN,
                 lp.PAR_LIMITPLAN,
             CASE
-                    
+                    WHEN lp.PAR_LIMITPLAN = 'DAY' THEN
+                    m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN 
                     WHEN lp.PAR_LIMITPLAN = 'SHIFT' THEN
                     m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|SHIFT|' || m.SHIFT_ 
                     WHEN lp.PAR_LIMITPLAN = 'PRODUK' THEN
                     m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|SHIFT|' || m.SHIFT_ || '|PRODUK|' || m.PRODUK 
                     WHEN lp.PAR_LIMITPLAN = 'BAHAN' THEN
-                    m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|SHIFT|' || m.SHIFT_ || '|KODE_ROLLS|' || m.KODE_ROLLS ELSE m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|ROW|' || m.NOMOR_LHP || '|' || m.NO_URUT_DETAIL 
+                    m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|SHIFT|' || m.SHIFT_ || '|KODE_ROLLS|' || m.KODE_ROLLS 
+                    ELSE 
+                    m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN || '|ROW|' || m.NOMOR_LHP || '|' || m.NO_URUT_DETAIL 
                 END AS GROUP_LIMIT_KEY 
             FROM
                 VOEE_MONITORING m
@@ -377,9 +386,20 @@ class Dashoeekk_mod extends CI_Model
         WITH base AS (
             SELECT
                 m.*,
-                lp.LIMITPLAN,
+                CASE
+                    WHEN TRIM(UPPER(m.KEGIATAN)) = 'ISHOMA'
+                        AND TO_CHAR(m.TANGGAL, 'D') = '6'
+                        AND m.SHIFT_ = '1'
+                    THEN 1.5
+                    ELSE lp.LIMITPLAN
+                END AS LIMITPLAN,
                 lp.PAR_LIMITPLAN,
                 CASE
+                    WHEN lp.PAR_LIMITPLAN = 'DAY' THEN
+                        TO_CHAR(TRUNC(m.TANGGAL), 'YYYYMMDD') || '|' ||
+                        m.KDMESIN || '|' ||
+                        TRIM(UPPER(m.KEGIATAN)) 
+
                     WHEN lp.PAR_LIMITPLAN = 'SHIFT' THEN
                         TO_CHAR(TRUNC(m.TANGGAL), 'YYYYMMDD') || '|' ||
                         m.KDMESIN || '|' ||
@@ -658,9 +678,18 @@ class Dashoeekk_mod extends CI_Model
                 m.OUTPUT,
                 m.TARGET,
                 m.SAT_TARGET,
-                lp.LIMITPLAN,
+                CASE
+                    WHEN TRIM(UPPER(m.KEGIATAN)) = 'ISHOMA'
+                        AND TO_CHAR(m.TANGGAL, 'D') = '6'
+                        AND m.SHIFT_ = '1'
+                    THEN 1.5
+                    ELSE lp.LIMITPLAN
+                END AS LIMITPLAN,
                 lp.PAR_LIMITPLAN,
                 CASE
+                    WHEN lp.PAR_LIMITPLAN = 'DAY' THEN
+                        TO_CHAR(TRUNC(m.TANGGAL), 'YYYYMMDD') || '|' || m.KDMESIN || '|' ||
+                        TRIM(UPPER(m.KEGIATAN))                   
                     WHEN lp.PAR_LIMITPLAN = 'SHIFT' THEN
                         TO_CHAR(TRUNC(m.TANGGAL), 'YYYYMMDD') || '|' || m.KDMESIN || '|' ||
                         TRIM(UPPER(m.KEGIATAN)) || '|SHIFT|' || m.SHIFT_
@@ -736,6 +765,7 @@ class Dashoeekk_mod extends CI_Model
         )
         SELECT
             NOMOR_LHP,
+            TANGGAL,
             NO_URUT_DETAIL,
             NOMOR_KK,
             PRODUK,
@@ -750,8 +780,10 @@ class Dashoeekk_mod extends CI_Model
             PAR_LIMITPLAN
         FROM (
             SELECT
-                NOMOR_LHP, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
-                KEGIATAN, KTG_LOSSTIME, JAM1, JAM2,
+                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
+                KEGIATAN, KTG_LOSSTIME, 
+                TO_CHAR(JAM1, 'YYYY-MM-DD HH24:MI:SS') AS JAM1, 
+                TO_CHAR(JAM2, 'YYYY-MM-DD HH24:MI:SS') AS JAM2,
                 WAKTU_BLT AS WAKTU_BLT_ASLI,
                 WAKTU_PLANNED_FIX AS WAKTU_BLT,
                 LIMITPLAN, PAR_LIMITPLAN,
@@ -762,10 +794,11 @@ class Dashoeekk_mod extends CI_Model
             UNION ALL
 
             SELECT
-                NOMOR_LHP, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
+                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
                 'OVER - ' || KEGIATAN AS KEGIATAN,
                 'UNPLANNED' AS KTG_LOSSTIME,
-                JAM1, JAM2,
+                TO_CHAR(JAM1, 'YYYY-MM-DD HH24:MI:SS') AS JAM1, 
+                TO_CHAR(JAM2, 'YYYY-MM-DD HH24:MI:SS') AS JAM2,
                 WAKTU_BLT AS WAKTU_BLT_ASLI,
                 WAKTU_UNPLANNED_FIX AS WAKTU_BLT,
                 LIMITPLAN, PAR_LIMITPLAN,
@@ -784,6 +817,7 @@ class Dashoeekk_mod extends CI_Model
         $sql = "
         SELECT
             NOMOR_LHP,
+            TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL,
             NO_URUT_DETAIL,
             NOMOR_KK,
             PRODUK,

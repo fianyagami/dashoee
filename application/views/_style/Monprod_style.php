@@ -78,15 +78,8 @@
         line-height: 16px;
     }
 
-    #modalDetailWaktu .modal-dialog {
-        width: 98%;
-        max-width: 98%;
-    }
 
-    #modalDetailWaktu .modal-body {
-        overflow-x: hidden;
-    }
-
+    /* MODAL */
     #tblDetailWaktu {
         width: 100% !important;
         table-layout: fixed;
@@ -112,6 +105,16 @@
 
     #tblDetailWaktu td.text-center {
         text-align: center;
+    }
+
+
+    #modalDetailWaktu .modal-dialog {
+        width: 98%;
+        max-width: 98%;
+    }
+
+    #modalDetailWaktu .modal-body {
+        overflow-x: hidden;
     }
 
     #modalDetailWaktu .modal-header {
@@ -145,4 +148,6 @@
     #tblDetailWaktu tfoot th:nth-child(13) {
         color: #8e44ad;
     }
+
+    /* MODAL */
 </style>
