@@ -530,22 +530,32 @@ class Dashoeekk_mod extends CI_Model
                 WAKTU_UNPLANNED_FIX AS WAKTU_BLT
             FROM split_data
             WHERE WAKTU_UNPLANNED_FIX > 0
+        ),
+
+        total_waktu AS (
+            SELECT
+                SUM(WAKTU_BLT) AS TOTAL_ALL,
+                SUM(CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT ELSE 0 END) AS TOTAL_PLANNED,
+                SUM(WAKTU_BLT) 
+                    - SUM(CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT ELSE 0 END) AS DENOMINATOR
+            FROM data_fix
         )
 
        SELECT *
         FROM (
             SELECT
-                KEGIATAN,
+                d.KEGIATAN,
                 COUNT(*) AS FREQ_DOWNTIME,
-                SUM(WAKTU_BLT) AS WAKTU_DOWNTIME,
+                SUM(d.WAKTU_BLT) AS WAKTU_DOWNTIME,
                 ROUND(
-                    SUM(WAKTU_BLT) /
-                    NULLIF(SUM(SUM(WAKTU_BLT)) OVER (), 0) * 100,
+                    SUM(d.WAKTU_BLT) /
+                    NULLIF(t.DENOMINATOR, 0) * 100, 
                     2
                 ) AS PERSEN
-            FROM data_fix
-            WHERE KATEGORI <> 'PRODUKSI' AND KTG_LOSSTIME = 'UNPLANNED'
-            GROUP BY KEGIATAN
+            FROM data_fix d
+            CROSS JOIN total_waktu t  
+            WHERE d.KATEGORI <> 'PRODUKSI' AND d.KTG_LOSSTIME = 'UNPLANNED'
+            GROUP BY d.KEGIATAN, t.DENOMINATOR
             ORDER BY PERSEN DESC
         )
         WHERE ROWNUM <= 5
