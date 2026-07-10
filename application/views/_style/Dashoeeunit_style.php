@@ -1,28 +1,28 @@
 <style>
-    #page-dashoeekk-kk .filter-box {
+    #page-dashoeeunit .filter-box {
         margin-bottom: 15px;
     }
 
-    #page-dashoeekk-kk .dashboard-title {
+    #page-dashoeeunit .dashboard-title {
         text-align: center;
         margin: 20px 0;
         line-height: 1.4;
     }
 
-    #page-dashoeekk-kk .dashboard-title-main {
+    #page-dashoeeunit .dashboard-title-main {
         font-size: 26px;
         font-weight: bold;
         color: #2A5C8A;
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .dashboard-title-sub {
+    #page-dashoeeunit .dashboard-title-sub {
         font-size: 20px;
         font-weight: bold;
         color: #16A085;
     }
 
-    #page-dashoeekk-kk .oee-panel {
+    #page-dashoeeunit .oee-panel {
         border: 1px solid #ddd;
         padding: 12px;
         margin-bottom: 15px;
@@ -30,19 +30,19 @@
         border-radius: 4px;
     }
 
-    #page-dashoeekk-kk .oee-panel-title {
+    #page-dashoeeunit .oee-panel-title {
         text-align: center;
         font-weight: bold;
         margin-bottom: 10px;
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .chart-box {
+    #page-dashoeeunit .chart-box {
         width: 100%;
         height: 320px;
     }
 
-    #page-dashoeekk-kk .oee-score {
+    #page-dashoeeunit .oee-score {
         text-align: center;
         font-size: 52px;
         font-weight: bold;
@@ -50,14 +50,14 @@
         margin-top: 45px;
     }
 
-    #page-dashoeekk-kk .oee-status {
+    #page-dashoeeunit .oee-status {
         text-align: center;
         font-size: 28px;
         font-weight: bold;
         color: purple;
     }
 
-    #page-dashoeekk-kk .oee-formula {
+    #page-dashoeeunit .oee-formula {
         text-align: center;
         font-size: 18px;
         font-weight: bold;
@@ -65,36 +65,20 @@
         margin-top: 15px;
     }
 
-    #page-dashoeekk-kk .select2-container {
+    #page-dashoeeunit .select2-container {
         width: 100% !important;
     }
 
-    #page-dashoeekk-kk .select2-kk-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
-    #page-dashoeekk-kk .select2-kk-nomor {
-        font-weight: bold;
-        width: 35%;
-    }
-
-    #page-dashoeekk-kk .select2-kk-produk {
-        width: 65%;
-        color: #555;
-    }
-
-    #page-dashoeekk-kk .oee-progress-wrap {
+    #page-dashoeeunit .oee-progress-wrap {
         margin-top: 22px;
         padding: 0 25px;
     }
 
-    #page-dashoeekk-kk .oee-progress-item {
+    #page-dashoeeunit .oee-progress-item {
         margin-bottom: 12px;
     }
 
-    #page-dashoeekk-kk .oee-progress-label {
+    #page-dashoeeunit .oee-progress-label {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
@@ -103,37 +87,37 @@
         color: #555;
     }
 
-    #page-dashoeekk-kk .oee-progress-wrap .progress {
+    #page-dashoeeunit .oee-progress-wrap .progress {
         height: 16px;
         margin-bottom: 0;
         border-radius: 20px;
         background: #f1f1f1;
     }
 
-    #page-dashoeekk-kk .oee-progress-wrap .progress-bar {
+    #page-dashoeeunit .oee-progress-wrap .progress-bar {
         line-height: 16px;
         border-radius: 20px;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link {
+    #page-dashoeeunit .oee-panel-detail-link {
         text-align: right;
         margin-top: 10px;
         padding-top: 8px;
         border-top: 1px dashed #ddd;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a {
+    #page-dashoeeunit .oee-panel-detail-link a {
         font-size: 14px;
         font-weight: 600;
         color: #05a73b;
         text-decoration: none;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a:hover {
+    #page-dashoeeunit .oee-panel-detail-link a:hover {
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a.disabled {
+    #page-dashoeeunit .oee-panel-detail-link a.disabled {
         color: #aaa;
         cursor: not-allowed;
         pointer-events: none;
@@ -215,7 +199,7 @@
     /* filter row */
 
     /* Target OEE Unit */
-    #page-dashoeekk-kk .target-unit-box {
+    #page-dashoeeunit .target-unit-box {
         margin-top: 20px;
         padding: 30px;
         text-align: center;
@@ -224,14 +208,14 @@
         border-radius: 6px;
     }
 
-    #page-dashoeekk-kk .target-unit-label {
+    #page-dashoeeunit .target-unit-label {
         font-size: 17px;
         font-weight: 700;
         color: #c0392b;
         letter-spacing: 0.5px;
     }
 
-    #page-dashoeekk-kk .target-unit-value {
+    #page-dashoeeunit .target-unit-value {
         font-size: 28px;
         font-weight: bold;
         color: #e74c3c;

@@ -4,18 +4,51 @@
 
 <script>
     $(document).ready(function() {
-        var page = $('#page-dashoeekk-kk');
+        var page = $('#page-dashoeekk');
         if (page.length === 0) return;
 
         var tblDetailAR = null;
         var tblDetailQR = null;
         var tblDetailPR = null;
 
-        // DROPDOWN NOMOR KK
+        // DROPDOWN MESIN
+        $('#mesin').select2({
+            placeholder: 'Pilih Mesin',
+            ajax: {
+                url: '<?= site_url("Dashoeemesinkk/getMesin") ?>',
+                dataType: 'json',
+                delay: 300,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return data;
+                }
+            },
+            templateResult: formatMesin,
+            templateSelection: function(data) {
+                return data.text || data.mesin;
+            }
+        });
+
+        function formatMesin(data) {
+            if (!data.id) return data.text;
+
+            return $(
+                '<div class="select2-kk-row">' +
+                '<div class="select2-kk-nomor">' + data.kdmesin + '</div>' +
+                '<div class="select2-kk-produk">' + data.mesin + '</div>' +
+                '</div>'
+            );
+        }
+
+        //DROPDOWN NOMOR KK
         $('#nomor_kk').select2({
             placeholder: 'Pilih Nomor KK',
             ajax: {
-                url: '<?= site_url("Dashoeekk/getKK") ?>',
+                url: '<?= site_url("Dashoeemesinkk/getKK") ?>',
                 dataType: 'json',
                 delay: 300,
                 data: function(params) {
@@ -50,6 +83,12 @@
             $('#nomor_kk').val(null).trigger('change');
         });
 
+        // TOMBOL CLEAR KK
+        $('#btnClearKK').click(function() {
+            $('#tahun_kk').val(<?= date('Y') ?>);
+            $('#nomor_kk').val(null).trigger('change');
+        });
+
         // KLIK BUTTON BROWSE
         $('#btnBrowse').click(function() {
             loadDashboard();
@@ -62,25 +101,30 @@
             let type = $(this).data('type');
             let target = $(this).data('target');
 
-            let kkData = $('#nomor_kk').select2('data')[0];
-            if (!kkData) {
-                alert('Nomor KK wajib dipilih.');
+            let mesinData = $('#mesin').select2('data')[0];
+            if (!mesinData) {
+                alert('Mesin wajib dipilih.');
                 return;
             }
 
+            let kkData = $('#nomor_kk').select2('data')[0] || null;
+
             $(target).modal('show');
-            loadDetailModal(type, target, kkData);
+            loadDetailModal(type, target, mesinData, kkData);
         });
 
-        function loadDetailModal(type, target, kkData) {
+        function loadDetailModal(type, target, mesinData, kkData) {
             $.ajax({
-                url: '<?= site_url("Dashoeekk/getDetailModal") ?>',
+                url: '<?= site_url("Dashoeemesinkk/getDetailModal") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     type: type,
-                    nomor_kk: kkData.nomor_kk,
-                    tanggal_kk: kkData.tanggal_kk
+                    tahun: $('#tahun').val(),
+                    bulan: $('#bulan').val(),
+                    kdmesin: mesinData.kdmesin,
+                    nomor_kk: kkData ? kkData.nomor_kk : '',
+                    tanggal_kk: kkData ? kkData.tanggal_kk : ''
                 },
                 beforeSend: function() {
                     $(target).find('tbody').html(
@@ -105,6 +149,7 @@
         }
 
         function renderDetailAR(data) {
+            // Destroy dengan cara yang aman — cek via $.fn.DataTable.isDataTable
             if ($.fn.DataTable.isDataTable('#tblDetailAR')) {
                 $('#tblDetailAR').DataTable().destroy();
             }
@@ -155,11 +200,8 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'MESIN',
+                        data: 'NOMOR_KK',
                         className: 'text-center'
-                    },
-                    {
-                        data: 'PROSES'
                     },
                     {
                         data: 'PRODUK'
@@ -229,30 +271,27 @@
                         className: "text-center"
                     },
                     {
-                        targets: 3, // MESIN
-                        width: "110px",
-                        className: "text-center"
-                    },
-                    {
-                        targets: 4, // PROSES
-                        width: "130px"
-                    },
-                    {
-                        targets: 6, // SHIFT_
+                        targets: 3, // NOMOR_KK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 11, // WAKTU_ASLI
+                        targets: 5, // SHIFT_
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 10, // WAKTU_ASLI
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
                                 'font-weight': 'bold'
+                                // 'color': '#1e21ef'
                             });
                         }
                     },
                     {
-                        targets: 12, // LIMIT_PLAN
+                        targets: 11, // LIMIT_PLAN
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -262,7 +301,7 @@
                         }
                     },
                     {
-                        targets: 13, //  WAKTU_BLT
+                        targets: 12, //  WAKTU_BLT
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -272,6 +311,9 @@
                         }
                     },
                 ],
+                // scrollX: true,
+                // autoWidth: false,
+                // pageLength: 25,
                 language: {
                     emptyTable: 'Tidak ada data'
                 },
@@ -292,16 +334,18 @@
                             0;
                     }
 
+                    // WAKTU_BLT
                     var totalWaktu = api
-                        .column(12, {
+                        .column(11, {
                             search: 'applied'
-                        }) // LIMITPLAN
+                        })
                         .data()
                         .reduce(function(a, b) {
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    $(api.column(13).footer()).html(formatNumber(totalWaktu)); // WAKTU_BLT
+
+                    $(api.column(12).footer()).html(formatNumber(totalWaktu));
                 }
             });
 
@@ -309,6 +353,7 @@
         }
 
         function renderDetailQR(data) {
+            // Destroy dengan cara yang aman — cek via $.fn.DataTable.isDataTable
             if ($.fn.DataTable.isDataTable('#tblDetailQR')) {
                 $('#tblDetailQR').DataTable().destroy();
             }
@@ -359,11 +404,8 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'MESIN',
+                        data: 'NOMOR_KK',
                         className: 'text-center'
-                    },
-                    {
-                        data: 'PROSES'
                     },
                     {
                         data: 'PRODUK'
@@ -407,88 +449,100 @@
                     }
                 ],
                 columnDefs: [{
-                        targets: 0,
+                        targets: 0, // NOMOR_LHP
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 1,
+                        targets: 1, // TANGGAL
                         width: "90px"
                     },
                     {
-                        targets: 2,
+                        targets: 2, // NO_URUT_DETAIL
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 3, // MESIN
-                        width: "110px",
-                        className: "text-center"
-                    },
-                    {
-                        targets: 4, // PROSES
-                        width: "130px"
-                    },
-                    {
-                        targets: 6, // SHIFT_
+                        targets: 3, // NOMOR_KK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 8, // BAIK
+                        targets: 5, // SHIFT_
+                        width: "70px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 7, // BAIK
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
                                 'font-weight': 'bold'
+                                // 'color': '#1e21ef'
                             });
                         }
                     },
                     {
-                        targets: 9, // SAT_HASIL_BAIK
+                        targets: 8, // SAT_HASIL_BAIK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 10, // NAMA_WASTE
+                        targets: 9, // NAMA_WASTE
                         width: "210px"
                     },
                     {
-                        targets: 11, // RUSAK
+                        targets: 10, // RUSAK
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
                                 'font-weight': 'bold'
+                                // 'color': '#1e21ef'
                             });
                         }
                     },
                     {
-                        targets: 12, // SAT_HASIL_RUSAK
+                        targets: 11, // SAT_HASIL_RUSAK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 13, // OUTPUT
-                        width: "80px",
+                        targets: 12, // OUTPUT
+                        width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
                                 'font-weight': 'bold'
+                                // 'color': '#1e21ef'
                             });
                         }
-                    }
+                    },
                 ],
+                // scrollX: true,
+                // autoWidth: false,
+                // pageLength: 25,
                 language: {
                     emptyTable: 'Tidak ada data'
                 },
+                rowCallback: function(row, data) {
+                    if (data.KEGIATAN && data.KEGIATAN.indexOf('PRODUKSI MURNI') === 0) {
+                        $(row).css('color', 'green');
+                    }
+                },
                 footerCallback: function(row, data, start, end, display) {
+
                     var api = this.api();
 
                     function parseNumber(i) {
                         return typeof i === 'string' ?
                             parseFloat(i.toString().replace(/,/g, '')) || 0 :
-                            typeof i === 'number' ? i : 0;
+                            typeof i === 'number' ?
+                            i :
+                            0;
                     }
 
-                    var totalBaik = api.column(8, {
+                    // BAIK
+                    var totalBaik = api
+                        .column(7, {
                             search: 'applied'
                         })
                         .data()
@@ -496,7 +550,9 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var totalRusak = api.column(11, {
+                    // RUSAK
+                    var totalRusak = api
+                        .column(10, {
                             search: 'applied'
                         })
                         .data()
@@ -504,7 +560,9 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var totalOutput = api.column(13, {
+                    // OUTPUT
+                    var totalOutput = api
+                        .column(12, {
                             search: 'applied'
                         })
                         .data()
@@ -512,9 +570,9 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    $(api.column(8).footer()).html(formatNumber(totalBaik));
-                    $(api.column(11).footer()).html(formatNumber(totalRusak));
-                    $(api.column(13).footer()).html(formatNumber(totalOutput));
+                    $(api.column(7).footer()).html(formatNumber(totalBaik));
+                    $(api.column(10).footer()).html(formatNumber(totalRusak));
+                    $(api.column(12).footer()).html(formatNumber(totalOutput));
                 }
             });
 
@@ -569,7 +627,7 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'MESIN',
+                        data: 'NOMOR_KK',
                         className: 'text-center'
                     },
                     {
@@ -615,33 +673,33 @@
                 columnDefs: [{
                         targets: 0,
                         width: "90px"
-                    },
+                    }, // TANGGAL
                     {
                         targets: 1,
                         width: "50px"
-                    },
+                    }, // SHIFT
                     {
                         targets: 2,
-                        width: "110px"
-                    }, // MESIN
+                        width: "80px"
+                    }, // NOMOR_KK
                     {
                         targets: 3,
                         width: "150px"
-                    },
+                    }, // PRODUK
                     {
                         targets: 4,
                         width: "150px"
-                    },
+                    }, // PROSES
                     {
                         targets: 5,
-                        width: "90px",
+                        width: "90px", // TOTAL_OUTPUT
                         createdCell: function(td) {
                             $(td).css('font-weight', 'bold');
                         }
                     },
                     {
                         targets: 6,
-                        width: "90px",
+                        width: "90px", // WAKTU_PRODUKSI
                         createdCell: function(td) {
                             $(td).css('font-weight', 'bold');
                         }
@@ -649,11 +707,11 @@
                     {
                         targets: 7,
                         width: "90px"
-                    },
+                    }, // AVG_TARGET
                     {
                         targets: 8,
                         width: "90px"
-                    }
+                    } // PR
                 ],
 
                 language: {
@@ -669,6 +727,7 @@
                             typeof i === 'number' ? i : 0;
                     }
 
+                    // Total Output
                     var totalOutput = api.column(5, {
                             search: 'applied'
                         })
@@ -677,6 +736,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
+                    // Total Waktu Produksi
                     var totalWaktu = api.column(6, {
                             search: 'applied'
                         })
@@ -685,6 +745,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
+                    // AVG Rata-rata Target KK (semua data, bukan hanya page aktif)
                     var allTarget = api.column(7, {
                         search: 'applied'
                     }).data();
@@ -711,11 +772,16 @@
         }
 
         function buildFilterRow(tableId, dtInstance) {
+            // Dengan scrollX, DataTables membuat clone thead di div.dataTables_scrollHead
+            // Kita harus append filter row ke clone thead tersebut, bukan thead asli
+
             var wrapper = $('#' + tableId).closest('.dataTables_wrapper');
             var scrollHeadTable = wrapper.find('.dataTables_scrollHead table thead');
 
+            // Hapus filter row lama kalau ada
             scrollHeadTable.find('tr.filter-row').remove();
 
+            // Buat filter row
             var filterRow = $('<tr class="filter-row"></tr>');
 
             dtInstance.columns().every(function(colIdx) {
@@ -736,9 +802,11 @@
 
             scrollHeadTable.append(filterRow);
 
+            // Setiap draw, re-append ke scrollHead (bukan thead asli)
             dtInstance.on('draw.filterRow', function() {
                 var scrollHead = wrapper.find('.dataTables_scrollHead table thead');
                 if (scrollHead.find('tr.filter-row').length === 0) {
+                    // Restore nilai search yang sudah ada sebelumnya
                     filterRow.find('input').each(function() {
                         var colIdx = $(this).data('col');
                         $(this).val(dtInstance.column(colIdx).search());
@@ -749,20 +817,34 @@
         }
 
         function loadDashboard() {
-            let kkData = $('#nomor_kk').select2('data')[0];
+            let mesinData = $('#mesin').select2('data')[0];
+            let kkData = $('#nomor_kk').select2('data')[0] || null;
 
-            if (!kkData) {
-                alert('Nomor KK wajib dipilih.');
+            // if (!mesinData || !kkData) {
+            //     alert('Mesin dan Nomor KK wajib dipilih.');
+            //     return;
+            // }
+            if (!mesinData) {
+                alert('Mesin wajib dipilih.');
                 return;
             }
 
+            console.log('tahun:', $('#tahun').val());
+            console.log('bulan:', $('#bulan').val());
+            console.log('kdmesin:', mesinData.kdmesin);
+            // console.log('nomor_kk:', kkData.nomor_kk);
+            // console.log('tanggal_kk:', kkData.tanggal_kk);
+
             $.ajax({
-                url: '<?= site_url("Dashoeekk/getDashboard") ?>',
+                url: '<?= site_url("Dashoeemesinkk/getDashboard") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    nomor_kk: kkData.nomor_kk,
-                    tanggal_kk: kkData.tanggal_kk
+                    tahun: $('#tahun').val(),
+                    bulan: $('#bulan').val(),
+                    kdmesin: mesinData.kdmesin,
+                    nomor_kk: kkData ? kkData.nomor_kk : '',
+                    tanggal_kk: kkData ? kkData.tanggal_kk : ''
                 },
                 beforeSend: function() {
                     page.find('#loadingDashboardKK').show();
@@ -770,19 +852,27 @@
                     page.find('#btnBrowse').prop('disabled', true).html(
                         '<i class="fa fa-spinner fa-spin"></i> Loading...'
                     );
+
+                    // tblDetail.clear().draw();
                 },
                 success: function(res) {
                     let s = res.summary;
 
+                    let subTitle = kkData ?
+                        kkData.nomor_kk + ' - ' + kkData.nama_barang :
+                        'Semua KK';
+
                     $('#dashboardTitle').html(
-                        '<div class="dashboard-title-main">Dashboard OEE - ' + kkData.nomor_kk + '</div>' +
-                        '<div class="dashboard-title-sub">' + kkData.nama_barang + '</div>'
+                        '<div class="dashboard-title-main">Dashboard OEE - ' + mesinData.mesin + '</div>' +
+                        '<div class="dashboard-title-sub">' + subTitle + '</div>'
                     );
 
                     renderGauge('chartAR', 'Availability', parseFloat(s.AR), parseFloat(s.TARGET_AR));
                     renderGauge('chartPR', 'Performance', parseFloat(s.PR), parseFloat(s.TARGET_PR));
                     renderGauge('chartQR', 'Quality', parseFloat(s.QR), parseFloat(s.TARGET_QR));
 
+                    // renderBarHorizontal('chartDowntime', 'Top 5 Unplanned Downtime', res.downtime, 'KEGIATAN', 'PERSEN', '%');
+                    // renderBarHorizontal('chartDefect', 'Top 5 Defect', res.defect, 'KEGIATAN', 'JUMLAH', '');
                     renderBarHorizontal('chartDowntime', 'Top 5 Unplanned Downtime', res.downtime, 'KEGIATAN', 'PERSEN', '%', [{
                             label: 'Jumlah Downtime (kali)',
                             field: 'FREQ_DOWNTIME'
@@ -802,6 +892,12 @@
                     let pr = parseFloat(s.PR || 0);
                     let qr = parseFloat(s.QR || 0);
                     let oee = parseFloat(s.OEE || 0);
+
+                    console.log('RESPONSE:', res);
+                    console.log('SUMMARY:', res.summary);
+                    console.log('DOWNTIME:', res.downtime);
+                    console.log('DEFECT:', res.defect);
+                    console.log('ACTUAL TARGET:', res.actual_target);
 
                     $('#oeeScore').text(oee.toFixed(2) + '%');
                     $('#oeeStatus').text(getOeeStatus(oee));
@@ -844,6 +940,7 @@
         }
 
         function renderGauge(id, title, value, target) {
+            // let chart = echarts.init(document.getElementById(id));
             let dom = document.getElementById(id);
             let chart = echarts.getInstanceByDom(dom);
             if (chart) chart.dispose();
@@ -894,6 +991,10 @@
                     }]
                 }]
             });
+
+            // window.addEventListener('resize', function() {
+            //     chart.resize();
+            // });
         }
 
         function renderBarHorizontal(id, title, data, labelField, valueField, suffix, extraFields) {
@@ -1098,6 +1199,29 @@
             $('#progressQR').css('width', Math.min(qr, 100) + '%');
         }
 
+        function formatDateTimeMinute(value) {
+            if (!value) return '';
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).replace('T', ' ').substring(0, 16);
+
+            const parts = dateStr.split(' ');
+            if (parts.length < 2) return value;
+
+            const datePart = parts[0];
+            const timePart = parts[1];
+
+            const d = datePart.split('-');
+            if (d.length !== 3) return value;
+
+            return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
+        }
+
         function formatDecimal(value) {
             if (value === null || value === undefined || value === '') {
                 return '0';
@@ -1118,6 +1242,29 @@
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 2
             });
+        }
+
+        function formatDateDisplay(value) {
+
+            if (!value) {
+                return '';
+            }
+
+            let dateStr = value;
+
+            if (typeof value === 'object' && value.date) {
+                dateStr = value.date;
+            }
+
+            dateStr = String(dateStr).substring(0, 10);
+
+            const parts = dateStr.split('-');
+
+            if (parts.length !== 3) {
+                return value;
+            }
+
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
         }
 
         function formatDateTimeDisplay(value) {
@@ -1143,7 +1290,7 @@
             return d[2] + '/' + d[1] + '/' + d[0] + ' ' + timePart;
         }
 
-        // RESIZE HANDLER
+        // RESIZE HANDLER — cukup 1x, handle semua chart sekaligus
         window.addEventListener('resize', function() {
             ['chartAR', 'chartPR', 'chartQR', 'chartDowntime', 'chartDefect', 'chartActualTarget'].forEach(function(id) {
                 let instance = echarts.getInstanceByDom(document.getElementById(id));

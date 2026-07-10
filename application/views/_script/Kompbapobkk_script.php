@@ -28,6 +28,11 @@
             tblBapob.clear().draw();
         });
 
+        // User mulai mengetik No BAPOB secara manual -> sembunyikan notifikasi "tidak ditemukan"
+        $('#select_bapob').on('select2:opening select2:select', function() {
+            page.find('#bapobNotFoundAlert').hide();
+        });
+
         $('#select_kk').on('select2:select', function(e) {
             let data = e.params.data;
 
@@ -351,18 +356,26 @@
                 },
                 beforeSend: function() {
                     page.find('#loadingDetail').show();
+                    page.find('#bapobNotFoundAlert').hide();
                 },
                 success: function(res) {
                     let results = res.results || [];
 
-
-
                     if (results.length === 0) {
                         tblBapob.clear().draw();
 
-                        $('#select_bapob').val(null).trigger('change');
+                        $('#select_bapob').empty().val(null).trigger('change');
                         $('#info_bapob_produk').text('PRODUK: tidak ditemukan');
                         $('#info_bapob_dibuat').text('DIBUAT: -');
+
+                        // Tahun BAPOB tetap diisi dari KK (jika ada) supaya user
+                        // tinggal mengetik No BAPOB / Produk secara manual di dropdown.
+                        if (dataKK.TAHUN_BAPOB) {
+                            $('#thn_bapob').val(dataKK.TAHUN_BAPOB);
+                        }
+
+                        page.find('#bapobNotFoundAlert').show();
+                        $('#select_bapob').select2('open');
 
                         return;
                     }
@@ -421,6 +434,8 @@
                     }
 
                     bapob.TANGGAL_BAPOB = dataKK.TANGGAL_BAPOB;
+
+                    page.find('#bapobNotFoundAlert').hide();
 
                     let optionText = bapob.NO_BAPOB + ' - ' + bapob.PRODUK;
                     let newOption = new Option(optionText, bapob.NO_BAPOB, true, true);

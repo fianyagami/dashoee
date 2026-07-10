@@ -13,7 +13,9 @@
              </li>
              <li><a><i class="fa fa-line-chart"></i> Monitoring OEE <span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>dashoeekk">Monitoring OEE per KK</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeemesinkk">OEE per Mesin & KK</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeekk">OEE per KK</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeeweek">OEE per Week</a></li>
                      <li><a href="<?= base_url(); ?>core/error">-</a></li>
                      <!-- <li><a href="<?= base_url(); ?>core/error">Availability</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Performance</a></li>

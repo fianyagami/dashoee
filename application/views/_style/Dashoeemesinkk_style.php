@@ -1,28 +1,28 @@
 <style>
-    #page-dashoeekk-kk .filter-box {
+    #page-dashoeekk .filter-box {
         margin-bottom: 15px;
     }
 
-    #page-dashoeekk-kk .dashboard-title {
+    #page-dashoeekk .dashboard-title {
         text-align: center;
         margin: 20px 0;
         line-height: 1.4;
     }
 
-    #page-dashoeekk-kk .dashboard-title-main {
+    #page-dashoeekk .dashboard-title-main {
         font-size: 26px;
         font-weight: bold;
         color: #2A5C8A;
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .dashboard-title-sub {
+    #page-dashoeekk .dashboard-title-sub {
         font-size: 20px;
         font-weight: bold;
         color: #16A085;
     }
 
-    #page-dashoeekk-kk .oee-panel {
+    #page-dashoeekk .oee-panel {
         border: 1px solid #ddd;
         padding: 12px;
         margin-bottom: 15px;
@@ -30,19 +30,19 @@
         border-radius: 4px;
     }
 
-    #page-dashoeekk-kk .oee-panel-title {
+    #page-dashoeekk .oee-panel-title {
         text-align: center;
         font-weight: bold;
         margin-bottom: 10px;
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .chart-box {
+    #page-dashoeekk .chart-box {
         width: 100%;
         height: 320px;
     }
 
-    #page-dashoeekk-kk .oee-score {
+    #page-dashoeekk .oee-score {
         text-align: center;
         font-size: 52px;
         font-weight: bold;
@@ -50,14 +50,14 @@
         margin-top: 45px;
     }
 
-    #page-dashoeekk-kk .oee-status {
+    #page-dashoeekk .oee-status {
         text-align: center;
         font-size: 28px;
         font-weight: bold;
         color: purple;
     }
 
-    #page-dashoeekk-kk .oee-formula {
+    #page-dashoeekk .oee-formula {
         text-align: center;
         font-size: 18px;
         font-weight: bold;
@@ -65,36 +65,36 @@
         margin-top: 15px;
     }
 
-    #page-dashoeekk-kk .select2-container {
+    #page-dashoeekk .select2-container {
         width: 100% !important;
     }
 
-    #page-dashoeekk-kk .select2-kk-row {
+    #page-dashoeekk .select2-kk-row {
         display: flex;
         justify-content: space-between;
         gap: 10px;
     }
 
-    #page-dashoeekk-kk .select2-kk-nomor {
+    #page-dashoeekk .select2-kk-nomor {
         font-weight: bold;
         width: 35%;
     }
 
-    #page-dashoeekk-kk .select2-kk-produk {
+    #page-dashoeekk .select2-kk-produk {
         width: 65%;
         color: #555;
     }
 
-    #page-dashoeekk-kk .oee-progress-wrap {
+    #page-dashoeekk .oee-progress-wrap {
         margin-top: 22px;
         padding: 0 25px;
     }
 
-    #page-dashoeekk-kk .oee-progress-item {
+    #page-dashoeekk .oee-progress-item {
         margin-bottom: 12px;
     }
 
-    #page-dashoeekk-kk .oee-progress-label {
+    #page-dashoeekk .oee-progress-label {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
@@ -103,41 +103,59 @@
         color: #555;
     }
 
-    #page-dashoeekk-kk .oee-progress-wrap .progress {
+    #page-dashoeekk .oee-progress-wrap .progress {
         height: 16px;
         margin-bottom: 0;
         border-radius: 20px;
         background: #f1f1f1;
     }
 
-    #page-dashoeekk-kk .oee-progress-wrap .progress-bar {
+    #page-dashoeekk .oee-progress-wrap .progress-bar {
         line-height: 16px;
         border-radius: 20px;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link {
+    #page-dashoeekk .oee-panel-detail-link {
         text-align: right;
         margin-top: 10px;
         padding-top: 8px;
         border-top: 1px dashed #ddd;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a {
+    #page-dashoeekk .oee-panel-detail-link a {
         font-size: 14px;
         font-weight: 600;
         color: #05a73b;
         text-decoration: none;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a:hover {
+    #page-dashoeekk .oee-panel-detail-link a:hover {
         text-decoration: underline;
     }
 
-    #page-dashoeekk-kk .oee-panel-detail-link a.disabled {
+    #page-dashoeekk .oee-panel-detail-link a.disabled {
         color: #aaa;
         cursor: not-allowed;
         pointer-events: none;
     }
+
+    /* MODAL */
+
+    /* #page-dashoeekk~.modal .modal-detail-full,
+    .modal-detail-full {
+        width: 95vw;
+        max-width: 1600px;
+        margin: 20px auto;
+    }
+
+    .modal-detail-full .modal-body {
+        max-height: 75vh;
+        overflow-y: auto;
+    }
+
+    .modal-detail-full table.dataTable {
+        width: 100% !important;
+    } */
 
     .table-dashoeekk {
         width: 100% !important;
@@ -166,6 +184,7 @@
         text-align: center;
     }
 
+
     .modal-dashoeekk .modal-dialog {
         width: 98%;
         max-width: 98%;
@@ -193,6 +212,8 @@
         opacity: 1;
     }
 
+    /* MODAL */
+
     /* filter row */
     #tblDetailAR thead tr.filter-row input,
     #tblDetailQR thead tr.filter-row input,
@@ -215,7 +236,7 @@
     /* filter row */
 
     /* Target OEE Unit */
-    #page-dashoeekk-kk .target-unit-box {
+    #page-dashoeekk .target-unit-box {
         margin-top: 20px;
         padding: 30px;
         text-align: center;
@@ -224,14 +245,14 @@
         border-radius: 6px;
     }
 
-    #page-dashoeekk-kk .target-unit-label {
+    #page-dashoeekk .target-unit-label {
         font-size: 17px;
         font-weight: 700;
         color: #c0392b;
         letter-spacing: 0.5px;
     }
 
-    #page-dashoeekk-kk .target-unit-value {
+    #page-dashoeekk .target-unit-value {
         font-size: 28px;
         font-weight: bold;
         color: #e74c3c;

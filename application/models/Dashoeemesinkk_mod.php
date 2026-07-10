@@ -1,8 +1,39 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Dashoeekk_mod extends CI_Model
+class Dashoeemesinkk_mod extends CI_Model
 {
+
+    public function getMesin($q = null)
+    {
+        $sql = "
+            SELECT KODE_MESIN AS KDMESIN, TRIM(NAMA_MESIN) AS MESIN FROM V_MESIN_01
+        ";
+
+        $bind = array();
+
+        if (!empty($q)) {
+            $sql .= " WHERE UPPER(NAMA_MESIN) LIKE UPPER(?)";
+            $bind[] = "%" . $q . "%";
+            // $bind[] = "%" . $q . "%";
+        }
+
+        $sql .= " ORDER BY TRIM(NAMA_MESIN) ";
+
+        $query = $this->db->query($sql, $bind);
+
+        $data = array();
+        foreach ($query->result() as $row) {
+            $data[] = array(
+                'id'      => $row->KDMESIN,
+                'text'    => $row->MESIN,
+                'kdmesin' => $row->KDMESIN,
+                'mesin'   => $row->MESIN
+            );
+        }
+
+        return array('results' => $data);
+    }
 
     public function getKK($thn_kk, $q = null)
     {
@@ -34,10 +65,10 @@ class Dashoeekk_mod extends CI_Model
         $data = array();
         foreach ($query->result() as $row) {
             $data[] = array(
-                'id'          => $row->NOMOR_KK,
-                'text'        => $row->NOMOR_KK . ' - ' . $row->NAMA_BARANG,
-                'nomor_kk'    => $row->NOMOR_KK,
-                'tanggal_kk'  => $row->TANGGAL_KK,
+                'id'         => $row->NOMOR_KK,
+                'text'       => $row->NOMOR_KK . ' - ' . $row->NAMA_BARANG,
+                'nomor_kk'   => $row->NOMOR_KK,
+                'tanggal_kk' => $row->TANGGAL_KK,
                 'nama_barang' => $row->NAMA_BARANG
             );
         }
@@ -45,8 +76,61 @@ class Dashoeekk_mod extends CI_Model
         return array('results' => $data);
     }
 
-    public function getSummaryOEE($nomor_kk, $tanggal_kk)
+    public function getSummaryOEE($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
+        // $sql = "
+        //     SELECT
+        //         ROUND(
+        //             (
+        //                 SUM(CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT ELSE 0 END)
+        //                 /
+        //                 NULLIF(
+        //                     SUM(WAKTU_BLT) -
+        //                     SUM(CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT ELSE 0 END)
+        //                 , 0)
+        //             ) * 100
+        //         , 2) AS AR,
+
+        //         ROUND(
+        //             (
+        //                 (
+        //                     SUM(OUTPUT)
+        //                     /
+        //                     NULLIF(SUM(CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT ELSE 0 END), 0)
+        //                 )
+        //                 /
+        //                 NULLIF(AVG(TARGET), 0)
+        //             ) * 100
+        //         , 2) AS PR,
+
+        //         ROUND(
+        //             (
+        //                 SUM(BAIK)
+        //                 /
+        //                 NULLIF(SUM(OUTPUT), 0)
+        //             ) * 100
+        //         , 2) AS QR,
+
+        //         SUM(BAIK) AS BAIK,
+        //         SUM(RUSAK) AS RUSAK,
+        //         SUM(OUTPUT) AS OUTPUT,
+        //         AVG(TARGET) AS TARGET_KK,
+
+        //         SUM(CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT ELSE 0 END) AS WAKTU_PRO,
+        //         SUM(WAKTU_BLT) AS WAKTU_ALL,
+        //         SUM(CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT ELSE 0 END) AS WAKTU_PLANNED,
+
+        //         73 AS TARGET_AR,
+        //         85 AS TARGET_PR,
+        //         98 AS TARGET_QR
+
+        //         FROM VOEE_MONITORING
+        //         WHERE THN = ?
+        //         AND BLN_ = ?
+        //         AND KDMESIN = ?
+        //     ";
+        // $bind = array($tahun, $bulan, $kdmesin);
+
         $sql = "
         WITH base AS (
             SELECT
@@ -59,7 +143,7 @@ class Dashoeekk_mod extends CI_Model
                     ELSE lp.LIMITPLAN
                 END AS LIMITPLAN,
                 lp.PAR_LIMITPLAN,
-                CASE
+            CASE
                     WHEN lp.PAR_LIMITPLAN = 'DAY' THEN
                     m.TANGGAL || '|' || m.KDMESIN || '|' || m.KEGIATAN 
                     WHEN lp.PAR_LIMITPLAN = 'SHIFT' THEN
@@ -77,26 +161,44 @@ class Dashoeekk_mod extends CI_Model
                 AND TRIM( UPPER( lp.KEGIATAN ) ) = TRIM( UPPER( m.KEGIATAN ) ) 
             WHERE
                 m.NAMA_DEPARTEMEN != 'PACKING' AND
-                m.NOMOR_KK = ?
-                AND TRUNC(m.TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
-        ),
-        calc AS (
+                m.THN = ?
+                AND m.BLN_ = ? 
+                AND m.KDMESIN = ? 
+    ";
+
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= "
+              AND m.NOMOR_KK = ?
+              AND TRUNC(m.TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+        ";
+
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= "
+            ),
+            calc AS (
             SELECT
                 b.*,
             SUM( CASE WHEN b.KTG_LOSSTIME = 'PLANNED' AND b.LIMITPLAN IS NOT NULL THEN b.WAKTU_BLT ELSE 0 END ) OVER ( PARTITION BY b.GROUP_LIMIT_KEY ORDER BY b.JAM1, b.JAM2, b.NO_URUT_DETAIL ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS CUM_WAKTU,
             SUM( CASE WHEN b.KTG_LOSSTIME = 'PLANNED' AND b.LIMITPLAN IS NOT NULL THEN b.WAKTU_BLT ELSE 0 END ) OVER ( PARTITION BY b.GROUP_LIMIT_KEY ORDER BY b.JAM1, b.JAM2, b.NO_URUT_DETAIL ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING ) AS CUM_WAKTU_PREV 
-            FROM
-                base b 
-        ),
-        split_data AS (
+        FROM
+            base b 
+            ),
+            split_data AS (
             SELECT
                 c.*,
-                CASE
+            CASE
+                    
                     WHEN c.KTG_LOSSTIME = 'PLANNED' 
                     AND c.LIMITPLAN IS NOT NULL THEN
                         GREATEST( LEAST( c.LIMITPLAN - NVL( c.CUM_WAKTU_PREV, 0 ), c.WAKTU_BLT ), 0 ) ELSE c.WAKTU_BLT 
                         END AS WAKTU_PLANNED_FIX,
                 CASE
+                        
                         WHEN c.KTG_LOSSTIME = 'PLANNED' 
                         AND c.LIMITPLAN IS NOT NULL THEN
                             GREATEST(
@@ -104,49 +206,110 @@ class Dashoeekk_mod extends CI_Model
                                 0 
                             ) ELSE 0 
                         END AS WAKTU_UNPLANNED_FIX 
-            FROM
-                calc c 
-        ),
-        data_fix AS (
-            SELECT
-                THN, BLN_, NAMA_DEPARTEMEN, NOMOR_LHP, TANGGAL, NOMOR_KK, TANGGAL_KK,
-                REVISI_KE, STATUS_KK, PRODUK, NOMER_PO_CUSTOMER, KODE_BARANG_PO,
-                KODE_ROLLS, KODE_BARANG_BHN, NAMA_BARANG_BHN, KDMESIN, MESIN,
-                URUT_PROSES, KODE_PROSES, PROSES, SHIFT_, NO_URUT_DETAIL, KATEGORI,
-                KEGIATAN, GRUP2, KTG_LOSSTIME, JAM1, JAM2, WAKTU_BLT,
-                WAKTU_PLANNED_FIX AS WAKTU_BLT_2,
-                BAIK, SAT_HASIL_BAIK, KODE_WASTE, NAMA_WASTE, RUSAK, SAT_HASIL_RUSAK,
-                OUTPUT, TARGET, SAT_TARGET, LIMITPLAN, PAR_LIMITPLAN,
-                'ORIGINAL' AS TIPE_DATA 
-            FROM
-                split_data 
-            WHERE
-                WAKTU_PLANNED_FIX > 0 
-
-            UNION ALL
-
-            SELECT
-                THN, BLN_, NAMA_DEPARTEMEN, NOMOR_LHP, TANGGAL, NOMOR_KK, TANGGAL_KK,
-                REVISI_KE, STATUS_KK, PRODUK, NOMER_PO_CUSTOMER, KODE_BARANG_PO,
-                KODE_ROLLS, KODE_BARANG_BHN, NAMA_BARANG_BHN, KDMESIN, MESIN,
-                URUT_PROSES, KODE_PROSES, PROSES, SHIFT_, NO_URUT_DETAIL, KATEGORI,
-                'OVER - ' || KEGIATAN AS KEGIATAN, GRUP2,
-                'UNPLANNED' AS KTG_LOSSTIME, JAM1, JAM2, WAKTU_BLT,
-                WAKTU_UNPLANNED_FIX AS WAKTU_BLT_2,
-                BAIK, SAT_HASIL_BAIK, KODE_WASTE, NAMA_WASTE, RUSAK, SAT_HASIL_RUSAK,
-                OUTPUT, TARGET, SAT_TARGET, LIMITPLAN, PAR_LIMITPLAN,
-                'GENERATE_LIMITPLAN' AS TIPE_DATA 
-            FROM
-                split_data 
-            WHERE
-                WAKTU_UNPLANNED_FIX > 0 
-        ) 
-        SELECT
-            ROUND(
-                (
-                SUM( CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT_2 ELSE 0 END ) / NULLIF( SUM( WAKTU_BLT_2 ) - SUM( CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT_2 ELSE 0 END ), 0 ) 
-            ) * 100,
-            2 
+                    FROM
+                        calc c 
+                    ),
+                    data_fix AS (
+                    SELECT
+                        THN,
+                        BLN_,
+                        NAMA_DEPARTEMEN,
+                        NOMOR_LHP,
+                        TANGGAL,
+                        NOMOR_KK,
+                        TANGGAL_KK,
+                        REVISI_KE,
+                        STATUS_KK,
+                        PRODUK,
+                        NOMER_PO_CUSTOMER,
+                        KODE_BARANG_PO,
+                        KODE_ROLLS,
+                        KODE_BARANG_BHN,
+                        NAMA_BARANG_BHN,
+                        KDMESIN,
+                        MESIN,
+                        URUT_PROSES,
+                        KODE_PROSES,
+                        PROSES,
+                        SHIFT_,
+                        NO_URUT_DETAIL,
+                        KATEGORI,
+                        KEGIATAN,
+                        GRUP2,
+                        KTG_LOSSTIME,
+                        JAM1,
+                        JAM2,
+                        WAKTU_BLT,
+                        WAKTU_PLANNED_FIX AS WAKTU_BLT_2,
+                        BAIK,
+                        SAT_HASIL_BAIK,
+                        KODE_WASTE,
+                        NAMA_WASTE,
+                        RUSAK,
+                        SAT_HASIL_RUSAK,
+                        OUTPUT,
+                        TARGET,
+                        SAT_TARGET,
+                        LIMITPLAN,
+                        PAR_LIMITPLAN,
+                        'ORIGINAL' AS TIPE_DATA 
+                    FROM
+                        split_data 
+                    WHERE
+                        WAKTU_PLANNED_FIX > 0 UNION ALL
+                    SELECT
+                        THN,
+                        BLN_,
+                        NAMA_DEPARTEMEN,
+                        NOMOR_LHP,
+                        TANGGAL,
+                        NOMOR_KK,
+                        TANGGAL_KK,
+                        REVISI_KE,
+                        STATUS_KK,
+                        PRODUK,
+                        NOMER_PO_CUSTOMER,
+                        KODE_BARANG_PO,
+                        KODE_ROLLS,
+                        KODE_BARANG_BHN,
+                        NAMA_BARANG_BHN,
+                        KDMESIN,
+                        MESIN,
+                        URUT_PROSES,
+                        KODE_PROSES,
+                        PROSES,
+                        SHIFT_,
+                        NO_URUT_DETAIL,
+                        KATEGORI,
+                        'OVER - ' || KEGIATAN AS KEGIATAN,
+                        GRUP2,
+                        'UNPLANNED' AS KTG_LOSSTIME,
+                        JAM1,
+                        JAM2,
+                        WAKTU_BLT,
+                        WAKTU_UNPLANNED_FIX AS WAKTU_BLT_2,
+                        BAIK,
+                        SAT_HASIL_BAIK,
+                        KODE_WASTE,
+                        NAMA_WASTE,
+                        RUSAK,
+                        SAT_HASIL_RUSAK,
+                        OUTPUT,
+                        TARGET,
+                        SAT_TARGET,
+                        LIMITPLAN,
+                        PAR_LIMITPLAN,
+                        'GENERATE_LIMITPLAN' AS TIPE_DATA 
+                    FROM
+                        split_data 
+                    WHERE
+                        WAKTU_UNPLANNED_FIX > 0 
+                    ) SELECT
+                    ROUND(
+                        (
+                        SUM( CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT_2 ELSE 0 END ) / NULLIF( SUM( WAKTU_BLT_2 ) - SUM( CASE WHEN KTG_LOSSTIME = 'PLANNED' THEN WAKTU_BLT_2 ELSE 0 END ), 0 ) 
+                ) * 100,
+                2 
             ) AS AR,
             ROUND(
                 (
@@ -169,7 +332,6 @@ class Dashoeekk_mod extends CI_Model
             data_fix
         ";
 
-        $bind = array($nomor_kk, $tanggal_kk);
 
         $query = $this->db->query($sql, $bind);
         $row = $query->row_array();
@@ -183,7 +345,43 @@ class Dashoeekk_mod extends CI_Model
         return $row;
     }
 
-    public function getTopDowntime($nomor_kk, $tanggal_kk)
+    // public function getTopDowntime($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
+    // {
+    //     $sql = "
+    //         SELECT * FROM (
+    //             SELECT
+    //                 KEGIATAN,
+    //                 ROUND(
+    //                     SUM(WAKTU_BLT) /
+    //                     NULLIF(SUM(SUM(WAKTU_BLT)) OVER (), 0) * 100
+    //                 , 2) AS PERSEN
+    //             FROM VOEE_MONITORING
+    //             WHERE THN = ?
+    //             AND BLN_ = ?
+    //             AND KDMESIN = ?
+    //     ";
+    //     $bind = array($tahun, $bulan, $kdmesin);
+
+    //     if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+    //         $sql .= " AND NOMOR_KK = ?
+    //                 AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))";
+    //         $bind[] = $nomor_kk;
+    //         $bind[] = $tanggal_kk;
+    //     }
+
+    //     $sql .= "
+    //             AND GRUP2 = 'B0002'
+    //             AND KATEGORI <> 'PRODUKSI'
+    //             GROUP BY KEGIATAN
+    //             ORDER BY PERSEN DESC
+    //         )
+    //         WHERE ROWNUM <= 5
+    //     ";
+
+    //     return $this->db->query($sql, $bind)->result_array();
+    // }
+
+    public function getTopDowntime($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         $sql = "
         WITH base AS (
@@ -235,28 +433,51 @@ class Dashoeekk_mod extends CI_Model
                 ON lp.KDMESIN = m.KDMESIN
                AND TRIM(UPPER(lp.KEGIATAN)) = TRIM(UPPER(m.KEGIATAN))
             WHERE 
-                m.NAMA_DEPARTEMEN != 'PACKING' AND
-                m.NOMOR_KK = ?
+            m.NAMA_DEPARTEMEN != 'PACKING' AND  
+            m.THN = ?
+              AND m.BLN_ = ?
+              AND m.KDMESIN = ?
+    ";
+
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= "
+              AND m.NOMOR_KK = ?
               AND TRUNC(m.TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+        ";
+
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= "
         ),
+
         calc AS (
             SELECT
                 b.*,
-                SUM(CASE WHEN b.KTG_LOSSTIME = 'PLANNED' AND b.LIMITPLAN IS NOT NULL
-                         THEN b.WAKTU_BLT ELSE 0 END)
-                    OVER (PARTITION BY b.GROUP_LIMIT_KEY
-                          ORDER BY b.JAM1, b.JAM2, b.NO_URUT_DETAIL
-                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS CUM_WAKTU,
-                SUM(CASE WHEN b.KTG_LOSSTIME = 'PLANNED' AND b.LIMITPLAN IS NOT NULL
-                         THEN b.WAKTU_BLT ELSE 0 END)
-                    OVER (PARTITION BY b.GROUP_LIMIT_KEY
-                          ORDER BY b.JAM1, b.JAM2, b.NO_URUT_DETAIL
-                          ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING) AS CUM_WAKTU_PREV
+
+                SUM(
+                    CASE
+                        WHEN b.KTG_LOSSTIME = 'PLANNED'
+                         AND b.LIMITPLAN IS NOT NULL
+                        THEN b.WAKTU_BLT
+                        ELSE 0
+                    END
+                ) OVER (
+                    PARTITION BY b.GROUP_LIMIT_KEY
+                    ORDER BY b.JAM1, b.JAM2, b.NOMOR_LHP, b.NO_URUT_DETAIL
+                    ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+                ) AS CUM_WAKTU_PREV
+
             FROM base b
         ),
+
         split_data AS (
             SELECT
                 c.*,
+
                 CASE
                     WHEN c.KTG_LOSSTIME = 'PLANNED'
                      AND c.LIMITPLAN IS NOT NULL
@@ -294,7 +515,10 @@ class Dashoeekk_mod extends CI_Model
 
         data_fix AS (
             SELECT
-                KEGIATAN, GRUP2, KATEGORI, KTG_LOSSTIME,
+                KEGIATAN,
+                GRUP2,
+                KATEGORI,
+                KTG_LOSSTIME,
                 WAKTU_PLANNED_FIX AS WAKTU_BLT
             FROM split_data
             WHERE WAKTU_PLANNED_FIX > 0
@@ -303,7 +527,8 @@ class Dashoeekk_mod extends CI_Model
 
             SELECT
                 'OVER - ' || KEGIATAN AS KEGIATAN,
-                GRUP2, KATEGORI,
+                GRUP2,
+                KATEGORI,
                 'UNPLANNED' AS KTG_LOSSTIME,
                 WAKTU_UNPLANNED_FIX AS WAKTU_BLT
             FROM split_data
@@ -337,14 +562,12 @@ class Dashoeekk_mod extends CI_Model
             ORDER BY PERSEN DESC
         )
         WHERE ROWNUM <= 5
-        ";
-
-        $bind = array($nomor_kk, $tanggal_kk);
+    ";
 
         return $this->db->query($sql, $bind)->result_array();
     }
 
-    public function getTopDefect($nomor_kk, $tanggal_kk)
+    public function getTopDefect($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         $sql = "
         SELECT *
@@ -361,22 +584,32 @@ class Dashoeekk_mod extends CI_Model
                     SAT_HASIL_RUSAK
                 FROM VOEE_MONITORING
                 WHERE 
-                    NAMA_DEPARTEMEN != 'PACKING' AND
-                    NOMOR_KK = ?
-                  AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+                NAMA_DEPARTEMEN != 'PACKING' AND
+                THN = ?
+                AND BLN_ = ?
+                AND KDMESIN = ?
+    ";
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= " AND NOMOR_KK = ?
+                AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))";
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= "
                 GROUP BY NAMA_WASTE, SAT_HASIL_RUSAK
             )
             ORDER BY DEFECT DESC
         )
         WHERE ROWNUM <= 5
-        ";
-
-        $bind = array($nomor_kk, $tanggal_kk);
+    ";
 
         return $this->db->query($sql, $bind)->result_array();
     }
 
-    public function getActualTarget($nomor_kk, $tanggal_kk)
+    public function getActualTarget($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         $sql = "
             SELECT
@@ -386,46 +619,83 @@ class Dashoeekk_mod extends CI_Model
                 ROUND(SUM(CASE WHEN KATEGORI = 'PRODUKSI' THEN WAKTU_BLT ELSE 0 END), 2) AS TOTAL_WAKTU_PRODUKSI
             FROM VOEE_MONITORING
             WHERE 
-                NAMA_DEPARTEMEN != 'PACKING' AND
-                NOMOR_KK = ?
-              AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+            NAMA_DEPARTEMEN != 'PACKING' AND
+            THN = ?
+            AND BLN_ = ?
+            AND KDMESIN = ?
         ";
+        $bind = array($tahun, $bulan, $kdmesin);
 
-        $bind = array($nomor_kk, $tanggal_kk);
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= " AND NOMOR_KK = ?
+              AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))";
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
 
         return $this->db->query($sql, $bind)->row_array();
     }
 
-    public function getDetailModal($type, $nomor_kk, $tanggal_kk)
+    public function getDetailModal($type, $tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         switch ($type) {
             case 'AR':
-                return $this->getDetailAR($nomor_kk, $tanggal_kk);
+                return $this->getDetailAR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk);
 
             case 'QR':
-                return $this->getDetailQR($nomor_kk, $tanggal_kk);
+                return $this->getDetailQR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk);
 
             case 'PR':
-                return $this->getDetailPR($nomor_kk, $tanggal_kk);
+                return $this->getDetailPR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk);
 
             default:
                 return array();
         }
     }
 
-    // Nomor KK adalah induk data, jadi kolom NOMOR_KK diganti MESIN
-    private function getDetailAR($nomor_kk, $tanggal_kk)
+    private function getDetailAR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         $sql = "
         WITH base AS (
             SELECT
-                m.THN, m.BLN_, m.NAMA_DEPARTEMEN, m.NOMOR_LHP, m.TANGGAL, m.NOMOR_KK,
-                m.TANGGAL_KK, m.REVISI_KE, m.STATUS_KK, m.PRODUK, m.NOMER_PO_CUSTOMER,
-                m.KODE_BARANG_PO, m.KODE_ROLLS, m.KODE_BARANG_BHN, m.NAMA_BARANG_BHN,
-                m.KDMESIN, m.MESIN, m.URUT_PROSES, m.KODE_PROSES, m.PROSES, m.SHIFT_,
-                m.NO_URUT_DETAIL, m.KATEGORI, m.KEGIATAN, m.GRUP2, m.KTG_LOSSTIME,
-                m.JAM1, m.JAM2, m.WAKTU_BLT, m.BAIK, m.SAT_HASIL_BAIK, m.KODE_WASTE,
-                m.NAMA_WASTE, m.RUSAK, m.SAT_HASIL_RUSAK, m.OUTPUT, m.TARGET, m.SAT_TARGET,
+                m.THN,
+                m.BLN_,
+                m.NAMA_DEPARTEMEN,
+                m.NOMOR_LHP,
+                m.TANGGAL,
+                m.NOMOR_KK,
+                m.TANGGAL_KK,
+                m.REVISI_KE,
+                m.STATUS_KK,
+                m.PRODUK,
+                m.NOMER_PO_CUSTOMER,
+                m.KODE_BARANG_PO,
+                m.KODE_ROLLS,
+                m.KODE_BARANG_BHN,
+                m.NAMA_BARANG_BHN,
+                m.KDMESIN,
+                m.MESIN,
+                m.URUT_PROSES,
+                m.KODE_PROSES,
+                m.PROSES,
+                m.SHIFT_,
+                m.NO_URUT_DETAIL,
+                m.KATEGORI,
+                m.KEGIATAN,
+                m.GRUP2,
+                m.KTG_LOSSTIME,
+                m.JAM1,
+                m.JAM2,
+                m.WAKTU_BLT,
+                m.BAIK,
+                m.SAT_HASIL_BAIK,
+                m.KODE_WASTE,
+                m.NAMA_WASTE,
+                m.RUSAK,
+                m.SAT_HASIL_RUSAK,
+                m.OUTPUT,
+                m.TARGET,
+                m.SAT_TARGET,
                 CASE
                     WHEN TRIM(UPPER(m.KEGIATAN)) = 'ISHOMA'
                         AND TO_CHAR(m.TANGGAL, 'D') = '6'
@@ -457,9 +727,24 @@ class Dashoeekk_mod extends CI_Model
                     ON lp.KDMESIN = m.KDMESIN
                     AND TRIM(UPPER(lp.KEGIATAN)) = TRIM(UPPER(m.KEGIATAN))
             WHERE 
-                m.NAMA_DEPARTEMEN != 'PACKING' AND
-                m.NOMOR_KK = ?
+            m.NAMA_DEPARTEMEN != 'PACKING' AND
+            m.THN = ?
+              AND m.BLN_ = ?
+              AND m.KDMESIN = ?
+    ";
+
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= "
+              AND m.NOMOR_KK = ?
               AND TRUNC(m.TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+        ";
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= "
         ),
         calc AS (
             SELECT
@@ -499,12 +784,23 @@ class Dashoeekk_mod extends CI_Model
                 calc c
         )
         SELECT
-            NOMOR_LHP, TANGGAL, NO_URUT_DETAIL, MESIN, PROSES, PRODUK, SHIFT_,
-            KEGIATAN, KTG_LOSSTIME, JAM1, JAM2,
-            WAKTU_BLT_ASLI, WAKTU_BLT, LIMITPLAN, PAR_LIMITPLAN
+            NOMOR_LHP,
+            TANGGAL,
+            NO_URUT_DETAIL,
+            NOMOR_KK,
+            PRODUK,
+            SHIFT_,
+            KEGIATAN,
+            KTG_LOSSTIME,
+            JAM1,
+            JAM2,
+            WAKTU_BLT_ASLI,
+            WAKTU_BLT,
+            LIMITPLAN,
+            PAR_LIMITPLAN
         FROM (
             SELECT
-                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, MESIN, PROSES, PRODUK, SHIFT_,
+                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
                 KEGIATAN, KTG_LOSSTIME, 
                 TO_CHAR(JAM1, 'YYYY-MM-DD HH24:MI:SS') AS JAM1, 
                 TO_CHAR(JAM2, 'YYYY-MM-DD HH24:MI:SS') AS JAM2,
@@ -518,7 +814,7 @@ class Dashoeekk_mod extends CI_Model
             UNION ALL
 
             SELECT
-                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, MESIN, PROSES, PRODUK, SHIFT_,
+                NOMOR_LHP, TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL, NO_URUT_DETAIL, NOMOR_KK, PRODUK, SHIFT_,
                 'OVER - ' || KEGIATAN AS KEGIATAN,
                 'UNPLANNED' AS KTG_LOSSTIME,
                 TO_CHAR(JAM1, 'YYYY-MM-DD HH24:MI:SS') AS JAM1, 
@@ -530,23 +826,20 @@ class Dashoeekk_mod extends CI_Model
             FROM split_data
             WHERE WAKTU_UNPLANNED_FIX > 0
         )
-        ORDER BY NOMOR_LHP, MESIN, PROSES, SHIFT_, NO_URUT_DETAIL, URUT_DATA
-        ";
-
-        $bind = array($nomor_kk, $tanggal_kk);
+        ORDER BY NOMOR_LHP, NOMOR_KK, SHIFT_, NO_URUT_DETAIL, URUT_DATA
+    ";
 
         return $this->db->query($sql, $bind)->result_array();
     }
 
-    private function getDetailQR($nomor_kk, $tanggal_kk)
+    private function getDetailQR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         $sql = "
         SELECT
             NOMOR_LHP,
             TO_CHAR(TANGGAL, 'DD/MM/YYYY') AS TANGGAL,
             NO_URUT_DETAIL,
-            MESIN,
-            PROSES,
+            NOMOR_KK,
             PRODUK,
             SHIFT_,
             KEGIATAN,
@@ -560,30 +853,41 @@ class Dashoeekk_mod extends CI_Model
         FROM VOEE_MONITORING
         WHERE 
         NAMA_DEPARTEMEN != 'PACKING' AND
-        NOMOR_KK = ?
-          AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
-        ORDER BY NOMOR_LHP, MESIN, SHIFT_, NO_URUT_DETAIL
-        ";
+        THN = ?
+          AND BLN_ = ?
+          AND KDMESIN = ?
+    ";
 
-        $bind = array($nomor_kk, $tanggal_kk);
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= "
+          AND NOMOR_KK = ?
+          AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+        ";
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= " ORDER BY NOMOR_LHP, NOMOR_KK, SHIFT_, NO_URUT_DETAIL ";
 
         return $this->db->query($sql, $bind)->result_array();
     }
 
-    private function getDetailPR($nomor_kk, $tanggal_kk)
+    private function getDetailPR($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
     {
         /*
-         * Performance Rate per baris produksi (dikelompokkan per TANGGAL + SHIFT + MESIN + PRODUK + PROSES):
-         *   - TOTAL_OUTPUT       = SUM(BAIK + RUSAK)
-         *   - WAKTU_PRODUKSI     = SUM(WAKTU_BLT) WHERE KATEGORI = 'PRODUKSI'
-         *   - AVG_TARGET         = AVG(TARGET)
-         *   - PR = (TOTAL_OUTPUT / (WAKTU_PRODUKSI / AVG_TARGET)) * 100
-         */
+     * Performance Rate per baris produksi (dikelompokkan per TANGGAL + SHIFT + NOMOR_KK + PRODUK + PROSES):
+     *   - TOTAL_OUTPUT       = SUM(BAIK + RUSAK)  — total hasil output
+     *   - WAKTU_PRODUKSI     = SUM(WAKTU_BLT) WHERE KATEGORI = 'PRODUKSI'  — total waktu produksi murni
+     *   - AVG_TARGET         = AVG(TARGET)  — rata-rata target KK
+     *   - PR = (TOTAL_OUTPUT / (WAKTU_PRODUKSI / AVG_TARGET)) * 100
+     */
         $sql = "
         SELECT
             TO_CHAR(TANGGAL, 'DD/MM/YYYY')         AS TANGGAL,
             SHIFT_,
-            MESIN,
+            NOMOR_KK,
             PRODUK,
             PROSES,
             SUM(BAIK + RUSAK)                       AS TOTAL_OUTPUT,
@@ -601,22 +905,34 @@ class Dashoeekk_mod extends CI_Model
             * 100
             , 2)                                    AS PR
         FROM VOEE_MONITORING
-        WHERE 
-        NAMA_DEPARTEMEN != 'PACKING' AND
-        NOMOR_KK = ?
+        WHERE NAMA_DEPARTEMEN != 'PACKING' AND
+              THN    = ?
+          AND BLN_   = ?
+          AND KDMESIN = ?
+    ";
+
+        $bind = array($tahun, $bulan, $kdmesin);
+
+        if (!empty($nomor_kk) && !empty($tanggal_kk)) {
+            $sql .= "
+          AND NOMOR_KK    = ?
           AND TRUNC(TANGGAL_KK) = TRUNC(TO_DATE(?, 'YYYY-MM-DD HH24:MI:SS'))
+        ";
+            $bind[] = $nomor_kk;
+            $bind[] = $tanggal_kk;
+        }
+
+        $sql .= "
         GROUP BY
             TO_CHAR(TANGGAL, 'DD/MM/YYYY'),
             TANGGAL,
             SHIFT_,
-            MESIN,
+            NOMOR_KK,
             PRODUK,
             PROSES
         ORDER BY
-            TANGGAL, SHIFT_, MESIN, PROSES
-        ";
-
-        $bind = array($nomor_kk, $tanggal_kk);
+            TANGGAL, SHIFT_, NOMOR_KK, PROSES
+    ";
 
         return $this->db->query($sql, $bind)->result_array();
     }

@@ -98,6 +98,12 @@
                                 <select id="select_bapob" class="form-control" style="width:100%;"></select>
                             </div>
 
+                            <div id="bapobNotFoundAlert" class="alert alert-warning" style="display:none;">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                Data BAPOB tidak ditemukan otomatis dari KK ini (kemungkinan penulisan nama customer berbeda).
+                                Silakan pilih <strong>Tahun BAPOB</strong> dan cari <strong>No BAPOB</strong> secara manual di atas.
+                            </div>
+
                             <div class="info-selected">
                                 <h2 id="info_bapob_produk">PRODUK: -</h2>
                                 <h2 id="info_bapob_dibuat">PLATFORM: -</h2>

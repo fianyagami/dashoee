@@ -63,9 +63,9 @@ class Kompbapobkk extends CI_Controller
 
     public function get_header_bapob()
     {
-        $thn = $this->input->get('thn');
-        $tgl_bapob = $this->input->get('tgl_bapob');
-        $q   = $this->input->get('q');
+        $thn        = $this->input->get('thn');
+        $tgl_bapob  = $this->input->get('tgl_bapob');
+        $q          = $this->input->get('q');
         $customer   = $this->input->get('customer');
 
 
@@ -80,7 +80,8 @@ class Kompbapobkk extends CI_Controller
                 'PRODUK'         => $row->PRODUK,
                 'DIBUAT'         => $row->DIBUAT,
                 'KODE_TRANSAKSI' => $row->KODE_TRANSAKSI,
-                'TANGGAL_BAPOB'  => !empty($row->TANGGAL) ? date('d/m/Y', strtotime($row->TANGGAL)) : '',
+                // 'TANGGAL_BAPOB'  => !empty($row->TANGGAL) ? date('d/m/Y', strtotime($row->TANGGAL)) : '',
+                'TANGGAL_BAPOB'  => $row->TANGGAL,
                 'CUSTOMER'       => $row->CUSTOMER
             ];
         }

@@ -15,8 +15,7 @@ class Dashoeekk extends CI_Controller
 
     public function index()
     {
-        $data['tahun']      = date('Y');
-        $data['bulan']      = date('n');
+        $data['tahun_kk']   = date('Y');
 
         $data['judul']      = "OEE per KK";
         $data['template']   = "Dashoeekk_view";
@@ -26,12 +25,6 @@ class Dashoeekk extends CI_Controller
         $data['link']       = base_url() . 'dashoeekk';
 
         $this->load->view('v_main', $data);
-    }
-
-    public function getMesin()
-    {
-        $q = $this->input->get('q');
-        echo json_encode($this->Dashoeekk_mod->getMesin($q));
     }
 
     public function getKK()
@@ -44,17 +37,14 @@ class Dashoeekk extends CI_Controller
 
     public function getDashboard()
     {
-        $tahun      = $this->input->post('tahun');
-        $bulan      = $this->input->post('bulan');
-        $kdmesin    = $this->input->post('kdmesin');
         $nomor_kk   = $this->input->post('nomor_kk');
         $tanggal_kk = $this->input->post('tanggal_kk');
 
         $result = array(
-            'summary'       => $this->Dashoeekk_mod->getSummaryOEE($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk),
-            'downtime'      => $this->Dashoeekk_mod->getTopDowntime($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk),
-            'defect'        => $this->Dashoeekk_mod->getTopDefect($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk),
-            'actual_target' => $this->Dashoeekk_mod->getActualTarget($tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk)
+            'summary'       => $this->Dashoeekk_mod->getSummaryOEE($nomor_kk, $tanggal_kk),
+            'downtime'      => $this->Dashoeekk_mod->getTopDowntime($nomor_kk, $tanggal_kk),
+            'defect'        => $this->Dashoeekk_mod->getTopDefect($nomor_kk, $tanggal_kk),
+            'actual_target' => $this->Dashoeekk_mod->getActualTarget($nomor_kk, $tanggal_kk)
         );
 
         echo json_encode($result);
@@ -63,13 +53,10 @@ class Dashoeekk extends CI_Controller
     public function getDetailModal()
     {
         $type       = $this->input->post('type');
-        $tahun      = $this->input->post('tahun');
-        $bulan      = $this->input->post('bulan');
-        $kdmesin    = $this->input->post('kdmesin');
         $nomor_kk   = $this->input->post('nomor_kk');
         $tanggal_kk = $this->input->post('tanggal_kk');
 
-        $data = $this->Dashoeekk_mod->getDetailModal($type, $tahun, $bulan, $kdmesin, $nomor_kk, $tanggal_kk);
+        $data = $this->Dashoeekk_mod->getDetailModal($type, $nomor_kk, $tanggal_kk);
 
         echo json_encode(array('data' => $data));
     }

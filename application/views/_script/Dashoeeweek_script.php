@@ -1,54 +1,98 @@
 <script>
     var base_url = '<?= base_url(); ?>';
+    var defaultTahun = <?= (int) $tahun ?>;
+    var defaultMinggu = <?= (int) $minggu ?>;
 </script>
 
 <script>
     $(document).ready(function() {
-        var page = $('#page-dashoeekk-kk');
+        var page = $('#page-dashoeeweek');
         if (page.length === 0) return;
 
         var tblDetailAR = null;
         var tblDetailQR = null;
         var tblDetailPR = null;
 
-        // DROPDOWN NOMOR KK
-        $('#nomor_kk').select2({
-            placeholder: 'Pilih Nomor KK',
-            ajax: {
-                url: '<?= site_url("Dashoeekk/getKK") ?>',
-                dataType: 'json',
-                delay: 300,
-                data: function(params) {
-                    return {
-                        q: params.term,
-                        thn_kk: $('#tahun_kk').val()
-                    };
-                },
-                processResults: function(data) {
-                    return data;
-                }
-            },
-            templateResult: formatKK,
-            templateSelection: function(data) {
-                return data.nomor_kk || data.text;
-            }
-        });
+        var namaBulan = {
+            1: 'Januari',
+            2: 'Februari',
+            3: 'Maret',
+            4: 'April',
+            5: 'Mei',
+            6: 'Juni',
+            7: 'Juli',
+            8: 'Agustus',
+            9: 'September',
+            10: 'Oktober',
+            11: 'November',
+            12: 'Desember'
+        };
 
-        function formatKK(data) {
-            if (!data.id) return data.text;
-
-            return $(
-                '<div class="select2-kk-row">' +
-                '<div class="select2-kk-nomor">' + data.nomor_kk + '</div>' +
-                '<div class="select2-kk-produk">' + data.nama_barang + '</div>' +
-                '</div>'
-            );
+        // ================= ISO WEEK HELPERS =================
+        function isLeapYear(y) {
+            return (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
         }
 
-        // RESET NOMOR KK SAAT TAHUN KK BERUBAH
-        $('#tahun_kk').change(function() {
-            $('#nomor_kk').val(null).trigger('change');
+        function isoWeeksInYear(y) {
+            var p = function(year) {
+                var d = new Date(Date.UTC(year, 0, 1));
+                return d.getUTCDay();
+            };
+            var jan1Day = p(y);
+            return (jan1Day === 4 || (jan1Day === 3 && isLeapYear(y))) ? 53 : 52;
+        }
+
+        function getISOWeekRange(year, week) {
+            var jan4 = new Date(Date.UTC(year, 0, 4));
+            var jan4Day = jan4.getUTCDay() || 7; // Senin=1 ... Minggu=7
+            var week1Monday = new Date(jan4);
+            week1Monday.setUTCDate(jan4.getUTCDate() - jan4Day + 1);
+
+            var monday = new Date(week1Monday);
+            monday.setUTCDate(week1Monday.getUTCDate() + (week - 1) * 7);
+
+            var sunday = new Date(monday);
+            sunday.setUTCDate(monday.getUTCDate() + 6);
+
+            return {
+                start: monday,
+                end: sunday
+            };
+        }
+
+        function formatShortDate(d) {
+            var bulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            return String(d.getUTCDate()).padStart(2, '0') + ' ' + bulanSingkat[d.getUTCMonth()];
+        }
+
+        function populateMingguDropdown(selectedWeek) {
+            var tahun = parseInt($('#tahun').val());
+            var totalWeek = isoWeeksInYear(tahun);
+            var $minggu = $('#minggu');
+
+            $minggu.empty();
+
+            for (var w = 1; w <= totalWeek; w++) {
+                var range = getISOWeekRange(tahun, w);
+                var label = 'Minggu ' + w + ' (' + formatShortDate(range.start) + ' - ' + formatShortDate(range.end) + ')';
+                $minggu.append('<option value="' + w + '">' + label + '</option>');
+            }
+
+            if (selectedWeek && selectedWeek <= totalWeek) {
+                $minggu.val(selectedWeek);
+            }
+        }
+
+        // Inisialisasi awal
+        populateMingguDropdown(defaultMinggu);
+
+        // Kalau Tahun berubah, susun ulang daftar Minggu (default ke minggu 1)
+        $('#tahun').change(function() {
+            populateMingguDropdown(1);
         });
+
+        // ================= END ISO WEEK HELPERS =================
+
 
         // KLIK BUTTON BROWSE
         $('#btnBrowse').click(function() {
@@ -62,25 +106,19 @@
             let type = $(this).data('type');
             let target = $(this).data('target');
 
-            let kkData = $('#nomor_kk').select2('data')[0];
-            if (!kkData) {
-                alert('Nomor KK wajib dipilih.');
-                return;
-            }
-
             $(target).modal('show');
-            loadDetailModal(type, target, kkData);
+            loadDetailModal(type, target);
         });
 
-        function loadDetailModal(type, target, kkData) {
+        function loadDetailModal(type, target) {
             $.ajax({
-                url: '<?= site_url("Dashoeekk/getDetailModal") ?>',
+                url: '<?= site_url("Dashoeeweek/getDetailModal") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     type: type,
-                    nomor_kk: kkData.nomor_kk,
-                    tanggal_kk: kkData.tanggal_kk
+                    tahun: $('#tahun').val(),
+                    minggu: $('#minggu').val()
                 },
                 beforeSend: function() {
                     $(target).find('tbody').html(
@@ -159,6 +197,10 @@
                         className: 'text-center'
                     },
                     {
+                        data: 'NOMOR_KK',
+                        className: 'text-center'
+                    },
+                    {
                         data: 'PROSES'
                     },
                     {
@@ -234,16 +276,21 @@
                         className: "text-center"
                     },
                     {
-                        targets: 4, // PROSES
+                        targets: 4, // NOMOR_KK
+                        width: "80px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 5, // PROSES
                         width: "130px"
                     },
                     {
-                        targets: 6, // SHIFT_
+                        targets: 7, // SHIFT_
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 11, // WAKTU_ASLI
+                        targets: 12, // WAKTU_ASLI
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -252,7 +299,7 @@
                         }
                     },
                     {
-                        targets: 12, // LIMIT_PLAN
+                        targets: 13, // LIMIT_PLAN
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -262,7 +309,7 @@
                         }
                     },
                     {
-                        targets: 13, //  WAKTU_BLT
+                        targets: 14, //  WAKTU_BLT
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -293,15 +340,15 @@
                     }
 
                     var totalWaktu = api
-                        .column(12, {
+                        .column(13, {
                             search: 'applied'
-                        }) // LIMITPLAN
+                        })
                         .data()
                         .reduce(function(a, b) {
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    $(api.column(13).footer()).html(formatNumber(totalWaktu)); // WAKTU_BLT
+                    $(api.column(14).footer()).html(formatNumber(totalWaktu));
                 }
             });
 
@@ -360,6 +407,10 @@
                     },
                     {
                         data: 'MESIN',
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'NOMOR_KK',
                         className: 'text-center'
                     },
                     {
@@ -426,16 +477,21 @@
                         className: "text-center"
                     },
                     {
-                        targets: 4, // PROSES
+                        targets: 4, // NOMOR_KK
+                        width: "80px",
+                        className: "text-center"
+                    },
+                    {
+                        targets: 5, // PROSES
                         width: "130px"
                     },
                     {
-                        targets: 6, // SHIFT_
+                        targets: 7, // SHIFT_
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 8, // BAIK
+                        targets: 9, // BAIK
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -444,16 +500,16 @@
                         }
                     },
                     {
-                        targets: 9, // SAT_HASIL_BAIK
+                        targets: 10, // SAT_HASIL_BAIK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 10, // NAMA_WASTE
+                        targets: 11, // NAMA_WASTE
                         width: "210px"
                     },
                     {
-                        targets: 11, // RUSAK
+                        targets: 12, // RUSAK
                         width: "70px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -462,12 +518,12 @@
                         }
                     },
                     {
-                        targets: 12, // SAT_HASIL_RUSAK
+                        targets: 13, // SAT_HASIL_RUSAK
                         width: "70px",
                         className: "text-center"
                     },
                     {
-                        targets: 13, // OUTPUT
+                        targets: 14, // OUTPUT
                         width: "80px",
                         createdCell: function(td, cellData, rowData, row, col) {
                             $(td).css({
@@ -488,7 +544,7 @@
                             typeof i === 'number' ? i : 0;
                     }
 
-                    var totalBaik = api.column(8, {
+                    var totalBaik = api.column(9, {
                             search: 'applied'
                         })
                         .data()
@@ -496,7 +552,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var totalRusak = api.column(11, {
+                    var totalRusak = api.column(12, {
                             search: 'applied'
                         })
                         .data()
@@ -504,7 +560,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var totalOutput = api.column(13, {
+                    var totalOutput = api.column(14, {
                             search: 'applied'
                         })
                         .data()
@@ -512,9 +568,9 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    $(api.column(8).footer()).html(formatNumber(totalBaik));
-                    $(api.column(11).footer()).html(formatNumber(totalRusak));
-                    $(api.column(13).footer()).html(formatNumber(totalOutput));
+                    $(api.column(9).footer()).html(formatNumber(totalBaik));
+                    $(api.column(12).footer()).html(formatNumber(totalRusak));
+                    $(api.column(14).footer()).html(formatNumber(totalOutput));
                 }
             });
 
@@ -573,6 +629,10 @@
                         className: 'text-center'
                     },
                     {
+                        data: 'NOMOR_KK',
+                        className: 'text-center'
+                    },
+                    {
                         data: 'PRODUK'
                     },
                     {
@@ -621,12 +681,12 @@
                         width: "50px"
                     },
                     {
-                        targets: 2,
+                        targets: 2, // MESIN
                         width: "110px"
-                    }, // MESIN
+                    },
                     {
-                        targets: 3,
-                        width: "150px"
+                        targets: 3, // NOMOR_KK
+                        width: "80px"
                     },
                     {
                         targets: 4,
@@ -634,10 +694,7 @@
                     },
                     {
                         targets: 5,
-                        width: "90px",
-                        createdCell: function(td) {
-                            $(td).css('font-weight', 'bold');
-                        }
+                        width: "130px"
                     },
                     {
                         targets: 6,
@@ -648,10 +705,17 @@
                     },
                     {
                         targets: 7,
-                        width: "90px"
+                        width: "90px",
+                        createdCell: function(td) {
+                            $(td).css('font-weight', 'bold');
+                        }
                     },
                     {
                         targets: 8,
+                        width: "90px"
+                    },
+                    {
+                        targets: 9,
                         width: "90px"
                     }
                 ],
@@ -669,7 +733,7 @@
                             typeof i === 'number' ? i : 0;
                     }
 
-                    var totalOutput = api.column(5, {
+                    var totalOutput = api.column(6, {
                             search: 'applied'
                         })
                         .data()
@@ -677,7 +741,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var totalWaktu = api.column(6, {
+                    var totalWaktu = api.column(7, {
                             search: 'applied'
                         })
                         .data()
@@ -685,7 +749,7 @@
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    var allTarget = api.column(7, {
+                    var allTarget = api.column(8, {
                         search: 'applied'
                     }).data();
                     var validTarget = [];
@@ -699,9 +763,9 @@
                         }, 0) / validTarget.length :
                         0;
 
-                    $(api.column(5).footer()).html(formatNumber(totalOutput));
-                    $(api.column(6).footer()).html(formatDecimal(totalWaktu));
-                    $(api.column(7).footer()).html(
+                    $(api.column(6).footer()).html(formatNumber(totalOutput));
+                    $(api.column(7).footer()).html(formatDecimal(totalWaktu));
+                    $(api.column(8).footer()).html(
                         '<span title="Rata-rata dari semua baris">' + formatDecimal(avgTarget) + '</span>'
                     );
                 }
@@ -749,23 +813,19 @@
         }
 
         function loadDashboard() {
-            let kkData = $('#nomor_kk').select2('data')[0];
-
-            if (!kkData) {
-                alert('Nomor KK wajib dipilih.');
-                return;
-            }
+            let tahun = $('#tahun').val();
+            let minggu = $('#minggu').val();
 
             $.ajax({
-                url: '<?= site_url("Dashoeekk/getDashboard") ?>',
+                url: '<?= site_url("Dashoeeweek/getDashboard") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
-                    nomor_kk: kkData.nomor_kk,
-                    tanggal_kk: kkData.tanggal_kk
+                    tahun: tahun,
+                    minggu: minggu
                 },
                 beforeSend: function() {
-                    page.find('#loadingDashboardKK').show();
+                    page.find('#loadingDashboardWeek').show();
 
                     page.find('#btnBrowse').prop('disabled', true).html(
                         '<i class="fa fa-spinner fa-spin"></i> Loading...'
@@ -773,10 +833,17 @@
                 },
                 success: function(res) {
                     let s = res.summary;
+                    let r = res.range; // { awal: 'YYYY-MM-DD', akhir: 'YYYY-MM-DD' } dari server (otoritatif)
+
+                    function toDisplayDate(iso) {
+                        let p = iso.split('-');
+                        return p[2] + '/' + p[1] + '/' + p[0];
+                    }
 
                     $('#dashboardTitle').html(
-                        '<div class="dashboard-title-main">Dashboard OEE - ' + kkData.nomor_kk + '</div>' +
-                        '<div class="dashboard-title-sub">' + kkData.nama_barang + '</div>'
+                        '<div class="dashboard-title-main">Dashboard OEE Pura TSS-01</div>' +
+                        '<div class="dashboard-title-sub">Tahun ' + tahun + ' - Minggu ' + minggu +
+                        ' (' + toDisplayDate(r.awal) + ' - ' + toDisplayDate(r.akhir) + ')</div>'
                     );
 
                     renderGauge('chartAR', 'Availability', parseFloat(s.AR), parseFloat(s.TARGET_AR));
@@ -819,7 +886,7 @@
                     alert('Gagal mengambil data dashboard.');
                 },
                 complete: function() {
-                    page.find('#loadingDashboardKK').hide();
+                    page.find('#loadingDashboardWeek').hide();
 
                     page.find('#btnBrowse').prop('disabled', false).html(
                         '<i class="fa fa-search"></i> Browse'

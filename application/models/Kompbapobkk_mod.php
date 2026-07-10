@@ -107,31 +107,39 @@ class Kompbapobkk_mod extends CI_Model
     //     return $this->db->query($sql, $bind)->result();
     // }
 
-    public function getHeaderBAPOB($thn, $tgl_bapob, $customer = null, $q = null)
+    public function getHeaderBAPOB($thn, $tgl_bapob = null, $customer = null, $q = null)
     {
         $sql = "
-        SELECT *
-        FROM (
-            SELECT
-                NO_BAPOB,
-                PRODUK,
-                DIBUAT,
-                KODE_TRANSAKSI,
-                TANGGAL,
-                CUSTOMER
-            FROM VALL_BAPOB_HEAD
-            WHERE TAHUN = ? AND TANGGAL = ?
-    ";
+            SELECT *
+            FROM (
+                SELECT
+                    NO_BAPOB,
+                    PRODUK,
+                    DIBUAT,
+                    KODE_TRANSAKSI,
+                    TANGGAL,
+                    CUSTOMER
+                FROM VALL_BAPOB_HEAD
+                WHERE TAHUN = ?
+        ";
 
-        $bind = [$thn, $tgl_bapob];
+        $bind = [$thn];
+
+        // TANGGAL_BAPOB hanya dipakai saat auto-match dari KK.
+        // Untuk pencarian manual (dari dropdown), tanggal ini tidak dikirim,
+        // sehingga user bisa mencari cukup dengan Tahun BAPOB + Nomor/Produk BAPOB.
+        if (!empty($tgl_bapob)) {
+            $sql .= " AND TANGGAL = ? ";
+            $bind[] = $tgl_bapob;
+        }
 
         if (!empty($q)) {
             $sql .= "
-            AND (
-                UPPER(NO_BAPOB) LIKE UPPER(?)
-                OR UPPER(PRODUK) LIKE UPPER(?)
-            )
-        ";
+        AND (
+            UPPER(NO_BAPOB) LIKE UPPER(?)
+            OR UPPER(PRODUK) LIKE UPPER(?)
+        )
+    ";
 
             $like = '%' . $q . '%';
             $bind[] = $like;
@@ -146,25 +154,7 @@ class Kompbapobkk_mod extends CI_Model
             $cust = trim($cust);
 
             $sql .= "
-            AND (
-                TRIM(
-                    REGEXP_REPLACE(
-                        REPLACE(
-                            REPLACE(
-                                REPLACE(
-                                    REPLACE(
-                                        REPLACE(
-                                            REPLACE(
-                                                REPLACE(UPPER(CUSTOMER), '.', ' '),
-                                            ',', ' '),
-                                        'CV', ' '),
-                                    'PT', ' '),
-                                'UD', ' '),
-                            'PD', ' '),
-                        'TBK', ' '),
-                    '\s+', ' ')
-                ) LIKE ?
-                OR ? LIKE '%' ||
+                AND (
                     TRIM(
                         REGEXP_REPLACE(
                             REPLACE(
@@ -181,9 +171,27 @@ class Kompbapobkk_mod extends CI_Model
                                 'PD', ' '),
                             'TBK', ' '),
                         '\s+', ' ')
-                    ) || '%'
-            )
-        ";
+                    ) LIKE ?
+                    OR ? LIKE '%' ||
+                        TRIM(
+                            REGEXP_REPLACE(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(
+                                            REPLACE(
+                                                REPLACE(
+                                                    REPLACE(
+                                                        REPLACE(UPPER(CUSTOMER), '.', ' '),
+                                                    ',', ' '),
+                                                'CV', ' '),
+                                            'PT', ' '),
+                                        'UD', ' '),
+                                    'PD', ' '),
+                                'TBK', ' '),
+                            '\s+', ' ')
+                        ) || '%'
+                )
+            ";
 
             $bind[] = '%' . $cust . '%';
             $bind[] = $cust;

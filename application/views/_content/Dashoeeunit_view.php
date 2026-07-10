@@ -1,11 +1,11 @@
 <?php defined('_HOME') or exit('No direct script access allowed'); ?>
 
-<div id="page-dashoeekk-kk">
+<div id="page-dashoeeunit">
     <div class="x_content">
         <div class="body">
 
             <div class="x_title">
-                <h2>Dashboard OEE per KK</h2>
+                <h2>Dashboard OEE per Unit</h2>
                 <div class="clearfix"></div>
             </div>
 
@@ -18,17 +18,23 @@
 
                             <div class="row filter-box">
                                 <div class="col-md-3 col-sm-6">
-                                    <label>Tahun KK</label>
-                                    <select id="tahun_kk" class="form-control">
-                                        <?php for ($i = date('Y'); $i >= 2022; $i--) { ?>
-                                            <option value="<?= $i ?>"><?= $i ?></option>
+                                    <label>Tahun</label>
+                                    <select id="tahun" name="tahun" class="form-control">
+                                        <?php
+                                        $tahun_sekarang = (int) $tahun;
+                                        for ($i = 2022; $i <= 2027; $i++) {
+                                            $selected = ($i == $tahun_sekarang) ? 'selected' : '';
+                                        ?>
+                                            <option value="<?= $i ?>" <?= $selected ?>>
+                                                <?= $i ?>
+                                            </option>
                                         <?php } ?>
                                     </select>
                                 </div>
 
-                                <div class="col-md-5 col-sm-12">
-                                    <label>Nomor KK</label>
-                                    <select id="nomor_kk" class="form-control"></select>
+                                <div class="col-md-4 col-sm-6">
+                                    <label>Minggu Ke-</label>
+                                    <select id="minggu" name="minggu" class="form-control"></select>
                                 </div>
 
                                 <div class="col-md-2 col-sm-12">
@@ -39,13 +45,13 @@
                                 </div>
                             </div>
 
-                            <div id="loadingDashboardKK"
+                            <div id="loadingDashboardUnit"
                                 style="display:none; padding:15px; margin-bottom:10px;"
                                 class="alert alert-info text-center">
 
                                 <i class="fa fa-spinner fa-spin"></i>
                                 &nbsp; &nbsp; &nbsp; &nbsp;
-                                Loading Dashboard OEE KK...
+                                Loading Dashboard OEE Unit...
                                 &nbsp; &nbsp; &nbsp; &nbsp;
                                 <i class="fa fa-coffee"></i>
                             </div>
@@ -58,7 +64,7 @@
                         <div class="x_content">
 
                             <h3 id="dashboardTitle" class="dashboard-title">
-                                <div class="dashboard-title-main">Dashboard OEE</div>
+                                <div class="dashboard-title-main">Dashboard OEE Pura TSS-01</div>
                                 <div class="dashboard-title-sub">-</div>
                             </h3>
 
@@ -220,6 +226,7 @@
                                     <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nama Mesin</th>
+                                    <th>Nomor KK</th>
                                     <th>Proses</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
@@ -236,7 +243,7 @@
                             <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="12" style="text-align:right">Total Jam Kerja :</th>
+                                    <th colspan="13" style="text-align:right">Total Jam Kerja :</th>
                                     <th></th>
                                     <th colspan="2"></th>
                                 </tr>
@@ -270,6 +277,7 @@
                                     <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nama Mesin</th>
+                                    <th>Nomor KK</th>
                                     <th>Proses</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
@@ -285,7 +293,7 @@
                             <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="8" style="text-align:right">Total Hasil :</th>
+                                    <th colspan="9" style="text-align:right">Total Hasil :</th>
                                     <th></th>
                                     <th colspan="2"></th>
                                     <th></th>
@@ -321,6 +329,7 @@
                                     <th>Tanggal LHP</th>
                                     <th>Shift</th>
                                     <th>Nama Mesin</th>
+                                    <th>Nomor KK</th>
                                     <th>Produk</th>
                                     <th>Proses</th>
                                     <th>Total Output (Baik+Rusak)</th>
@@ -332,7 +341,7 @@
                             <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="5" style="text-align:right">Total :</th>
+                                    <th colspan="6" style="text-align:right">Total :</th>
                                     <th></th>
                                     <th></th>
                                     <th style="text-align:right; font-size:11px; color:#888;">AVG :</th>

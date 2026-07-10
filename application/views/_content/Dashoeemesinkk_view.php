@@ -1,11 +1,11 @@
 <?php defined('_HOME') or exit('No direct script access allowed'); ?>
 
-<div id="page-dashoeekk-kk">
+<div id="page-dashoeekk">
     <div class="x_content">
         <div class="body">
 
             <div class="x_title">
-                <h2>Dashboard OEE per KK</h2>
+                <h2>Dashboard OEE per Mesin & KK</h2>
                 <div class="clearfix"></div>
             </div>
 
@@ -17,7 +17,49 @@
                         <div class="x_content">
 
                             <div class="row filter-box">
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-md-2 col-sm-6">
+                                    <label>Tahun</label>
+                                    <select id="tahun" name="tahun" class="form-control">
+                                        <?php
+                                        $tahun_sekarang = date('Y'); // Mendapatkan tahun saat ini (contoh: 2026)
+                                        for ($i = 2022; $i <= 2027; $i++) {
+                                            // Periksa apakah tahun di loop sama dengan tahun sekarang
+                                            $selected = ($i == $tahun_sekarang) ? 'selected' : '';
+                                        ?>
+                                            <option value="<?= $i ?>" <?= $selected ?>>
+                                                <?= $i ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 col-sm-6">
+                                    <label>Bulan</label>
+                                    <?php $bulan = date('n'); // 'n' = bulan tanpa leading zero (1-12) 
+                                    ?>
+                                    <select id="bulan" name="bulan"
+                                        class="form-control select2_single">
+                                        <option value="1" <?= $bulan == 1 ? 'selected' : '' ?>>JANUARI</option>
+                                        <option value="2" <?= $bulan == 2 ? 'selected' : '' ?>>FEBRUARI</option>
+                                        <option value="3" <?= $bulan == 3 ? 'selected' : '' ?>>MARET</option>
+                                        <option value="4" <?= $bulan == 4 ? 'selected' : '' ?>>APRIL</option>
+                                        <option value="5" <?= $bulan == 5 ? 'selected' : '' ?>>MEI</option>
+                                        <option value="6" <?= $bulan == 6 ? 'selected' : '' ?>>JUNI</option>
+                                        <option value="7" <?= $bulan == 7 ? 'selected' : '' ?>>JULI</option>
+                                        <option value="8" <?= $bulan == 8 ? 'selected' : '' ?>>AGUSTUS</option>
+                                        <option value="9" <?= $bulan == 9 ? 'selected' : '' ?>>SEPTEMBER</option>
+                                        <option value="10" <?= $bulan == 10 ? 'selected' : '' ?>>OKTOBER</option>
+                                        <option value="11" <?= $bulan == 11 ? 'selected' : '' ?>>NOVEMBER</option>
+                                        <option value="12" <?= $bulan == 12 ? 'selected' : '' ?>>DESEMBER</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 col-sm-6">
+                                    <label>Mesin</label>
+                                    <select id="mesin" class="form-control"></select>
+                                </div>
+
+                                <div class="col-md-2 col-sm-6">
                                     <label>Tahun KK</label>
                                     <select id="tahun_kk" class="form-control">
                                         <?php for ($i = date('Y'); $i >= 2022; $i--) { ?>
@@ -26,9 +68,15 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-5 col-sm-12">
+                                <div class="col-md-2 col-sm-12">
                                     <label>Nomor KK</label>
-                                    <select id="nomor_kk" class="form-control"></select>
+                                    <div style="display:flex; gap:5px; align-items:center;">
+                                        <select id="nomor_kk" class="form-control" style="flex:1;"></select>
+                                        <button type="button" id="btnClearKK" class="btn btn-danger btn-sm"
+                                            title="Kosongkan Nomor KK" style="flex-shrink:0; height:34px;">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-2 col-sm-12">
@@ -38,6 +86,10 @@
                                     </button>
                                 </div>
                             </div>
+
+                            <!-- <div class="row filter-box">
+                            
+                        </div> -->
 
                             <div id="loadingDashboardKK"
                                 style="display:none; padding:15px; margin-bottom:10px;"
@@ -162,6 +214,7 @@
                                                         </div>
                                                     </div>
 
+
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
@@ -200,7 +253,6 @@
             </div>
         </div>
     </div>
-
     <!-- MODAL DETAIL AR -->
     <div class="modal fade modal-dashoeekk" id="modalDetailAR" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-xl" style="width: 95%;">
@@ -219,8 +271,7 @@
                                     <th>No LHP</th>
                                     <th>Tanggal</th>
                                     <th>Urut</th>
-                                    <th>Nama Mesin</th>
-                                    <th>Proses</th>
+                                    <th>Nomor KK</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
                                     <th>Kegiatan</th>
@@ -236,7 +287,7 @@
                             <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="12" style="text-align:right">Total Jam Kerja :</th>
+                                    <th colspan="11" style="text-align:right">Total Jam Kerja :</th>
                                     <th></th>
                                     <th colspan="2"></th>
                                 </tr>
@@ -269,8 +320,7 @@
                                     <th>No LHP</th>
                                     <th>Tanggal</th>
                                     <th>Urut</th>
-                                    <th>Nama Mesin</th>
-                                    <th>Proses</th>
+                                    <th>Nomor KK</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
                                     <th>Kegiatan</th>
@@ -285,7 +335,7 @@
                             <tbody></tbody>
                             <tfoot>
                                 <tr>
-                                    <th colspan="8" style="text-align:right">Total Hasil :</th>
+                                    <th colspan="7" style="text-align:right">Total Hasil :</th>
                                     <th></th>
                                     <th colspan="2"></th>
                                     <th></th>
@@ -320,7 +370,7 @@
                                 <tr>
                                     <th>Tanggal LHP</th>
                                     <th>Shift</th>
-                                    <th>Nama Mesin</th>
+                                    <th>Nomor KK</th>
                                     <th>Produk</th>
                                     <th>Proses</th>
                                     <th>Total Output (Baik+Rusak)</th>
