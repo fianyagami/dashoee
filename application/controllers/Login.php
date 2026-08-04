@@ -13,7 +13,8 @@ class Login extends CI_Controller
 
     function index()
     {
-        $this->load->view('v_login');
+        // $this->load->view('v_login');
+        $this->load->view('v_login2');
     }
 
     public function getClientIp()
@@ -32,11 +33,8 @@ class Login extends CI_Controller
         $this->load->library('Aes_encryption');
         $aes = new Aes_encryption();
 
-        $username = $this->input->post('username');
-        $password = $this->input->post('password');
-
-        // $encrypted_password = $aes->encrypt($password);
-        // var_dump("Encrypted Password: " . $encrypted_password);
+        $username = strtolower($this->input->post('username'));
+        $password = strtolower($this->input->post('password'));
 
         $where = array(
             'USERNAME' => $username,
@@ -44,6 +42,9 @@ class Login extends CI_Controller
             'IS_AKTIF' => 1
         );
         $cek = $this->m_login->cek_login($where)->num_rows();
+
+        header('Content-Type: application/json');
+
         if ($cek > 0) {
             $data = $this->m_login->cek_login($where)->row();
 
@@ -63,9 +64,14 @@ class Login extends CI_Controller
                 $ip
             );
 
-            redirect(base_url("core"));
+            echo json_encode([
+                'status'   => 'success',
+                'redirect' => base_url('core')
+            ]);
         } else {
-            redirect(base_url());
+            echo json_encode([
+                'status' => 'failed'
+            ]);
         }
     }
 

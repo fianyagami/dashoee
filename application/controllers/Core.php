@@ -28,6 +28,22 @@ class Core extends CI_Controller
         $this->load->view('v_main', $data);
     }
 
+    function log_module()
+    {
+        $id_user = $this->session->userdata($GLOBALS['project'] . '-ID_USER');
+        $nama_module = $this->input->post('nama_module');
+
+        if (!$id_user || !$nama_module) {
+            echo json_encode(['status' => 'failed']);
+            return;
+        }
+
+        $this->load->model('M_db');
+        $this->M_db->insertLogModule($id_user, $nama_module);
+
+        echo json_encode(['status' => 'success']);
+    }
+
 
     public function kosongan()
     {

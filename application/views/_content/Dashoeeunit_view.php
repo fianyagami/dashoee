@@ -1,6 +1,6 @@
 <?php defined('_HOME') or exit('No direct script access allowed'); ?>
 
-<div id="page-dashoeeunit">
+<div id="page-dashoeeunit-unit">
     <div class="x_content">
         <div class="body">
 
@@ -17,27 +17,42 @@
                         <div class="x_content">
 
                             <div class="row filter-box">
-                                <div class="col-md-3 col-sm-6">
+                                <div class="col-md-2 col-sm-6">
                                     <label>Tahun</label>
-                                    <select id="tahun" name="tahun" class="form-control">
-                                        <?php
-                                        $tahun_sekarang = (int) $tahun;
-                                        for ($i = 2022; $i <= 2027; $i++) {
-                                            $selected = ($i == $tahun_sekarang) ? 'selected' : '';
-                                        ?>
-                                            <option value="<?= $i ?>" <?= $selected ?>>
-                                                <?= $i ?>
-                                            </option>
+                                    <select id="tahun_unit" class="form-control">
+                                        <?php for ($i = date('Y'); $i >= 2022; $i--) { ?>
+                                            <option value="<?= $i ?>"><?= $i ?></option>
                                         <?php } ?>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4 col-sm-6">
-                                    <label>Minggu Ke-</label>
-                                    <select id="minggu" name="minggu" class="form-control"></select>
+                                <div class="col-md-2 col-sm-6">
+                                    <label>Bulan</label>
+                                    <select id="bulan_unit" class="form-control">
+                                        <?php
+                                        $namaBulan = array(
+                                            1  => 'Januari',
+                                            2  => 'Februari',
+                                            3  => 'Maret',
+                                            4  => 'April',
+                                            5  => 'Mei',
+                                            6  => 'Juni',
+                                            7  => 'Juli',
+                                            8  => 'Agustus',
+                                            9  => 'September',
+                                            10 => 'Oktober',
+                                            11 => 'November',
+                                            12 => 'Desember'
+                                        );
+                                        foreach ($namaBulan as $noBulan => $namaBulanText) {
+                                            $selected = ($noBulan == date('n')) ? 'selected' : '';
+                                            echo '<option value="' . $noBulan . '" ' . $selected . '>' . $namaBulanText . '</option>';
+                                        }
+                                        ?>
+                                    </select>
                                 </div>
 
-                                <div class="col-md-2 col-sm-12">
+                                <div class="col-md-3 col-sm-12">
                                     <label>&nbsp;</label>
                                     <button type="button" id="btnBrowse" class="btn btn-cari">
                                         <i class="fa fa-search"></i> Browse
@@ -51,7 +66,7 @@
 
                                 <i class="fa fa-spinner fa-spin"></i>
                                 &nbsp; &nbsp; &nbsp; &nbsp;
-                                Loading Dashboard OEE Unit...
+                                Loading Dashboard OEE TSS-01...
                                 &nbsp; &nbsp; &nbsp; &nbsp;
                                 <i class="fa fa-coffee"></i>
                             </div>
@@ -64,7 +79,7 @@
                         <div class="x_content">
 
                             <h3 id="dashboardTitle" class="dashboard-title">
-                                <div class="dashboard-title-main">Dashboard OEE Pura TSS-01</div>
+                                <div class="dashboard-title-main">Dashboard OEE TSS-01</div>
                                 <div class="dashboard-title-sub">-</div>
                             </h3>
 
@@ -199,6 +214,12 @@
                                 </div>
                             </div>
 
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="loadDurationText" class="load-duration-text"></div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -223,10 +244,10 @@
                             <thead>
                                 <tr>
                                     <th>No LHP</th>
+                                    <th>Nomor KK</th>
                                     <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nama Mesin</th>
-                                    <th>Nomor KK</th>
                                     <th>Proses</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
@@ -274,10 +295,10 @@
                             <thead>
                                 <tr>
                                     <th>No LHP</th>
+                                    <th>Nomor KK</th>
                                     <th>Tanggal</th>
                                     <th>Urut</th>
                                     <th>Nama Mesin</th>
-                                    <th>Nomor KK</th>
                                     <th>Proses</th>
                                     <th>Produk</th>
                                     <th>Shift</th>
@@ -327,9 +348,9 @@
                             <thead>
                                 <tr>
                                     <th>Tanggal LHP</th>
+                                    <th>Nomor KK</th>
                                     <th>Shift</th>
                                     <th>Nama Mesin</th>
-                                    <th>Nomor KK</th>
                                     <th>Produk</th>
                                     <th>Proses</th>
                                     <th>Total Output (Baik+Rusak)</th>

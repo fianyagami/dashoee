@@ -13,9 +13,11 @@
              </li>
              <li><a><i class="fa fa-line-chart"></i> Monitoring OEE <span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>dashoeemesinkk">OEE per Mesin & KK</a></li>
-                     <li><a href="<?= base_url(); ?>dashoeekk">OEE per KK</a></li>
-                     <li><a href="<?= base_url(); ?>dashoeeweek">OEE per Week</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeeunit" onclick="logModule('OEE per Unit')">OEE per Unit</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeedept" onclick="logModule('OEE per Dept')">OEE per Dept</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeeweek" onclick="logModule('OEE per Week')">OEE per Week</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeekk" onclick="logModule('OEE per KK')">OEE per KK</a></li>
+                     <li><a href="<?= base_url(); ?>dashoeemesinkk" onclick="logModule('OEE per Mesin & KK')">OEE per Mesin & KK</a></li>
                      <li><a href="<?= base_url(); ?>core/error">-</a></li>
                      <!-- <li><a href="<?= base_url(); ?>core/error">Availability</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Performance</a></li>
@@ -25,15 +27,15 @@
              </li>
              <li><a><i class="fa fa-paper-plane"></i> PPIC<span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>daftarkk">Daftar KK</a></li>
-                     <li><a href="<?= base_url(); ?>kompbapobkk">Komparasi BAPOB & KK</a></li>
-                     <li><a href="<?= base_url(); ?>kompkklhp">Komparasi KK & LHP</a></li>
+                     <li><a href="<?= base_url(); ?>daftarkk" onclick="logModule('Daftar KK')">Daftar KK</a></li>
+                     <li><a href="<?= base_url(); ?>kompbapobkk" onclick="logModule('Komparasi BAPOB & KK')">Komparasi BAPOB & KK</a></li>
+                     <li><a href="<?= base_url(); ?>kompkklhp" onclick="logModule('Komparasi KK & LHP')">Komparasi KK & LHP</a></li>
                      <li><a href="<?= base_url(); ?>core/error">-</a></li>
                  </ul>
              </li>
              <li><a><i class="fa fa-industry"></i> Produksi <span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>monprod">Monitoring Produksi</a></li>
+                     <li><a href="<?= base_url(); ?>monprod" onclick="logModule('Monitoring Produksi')">Monitoring Produksi</a></li>
                      <li><a href="<?= base_url(); ?>core/error">-</a></li>
                      <!-- <li><a href="<?= base_url(); ?>core/error">Progress KK</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Produktivitas</a></li> -->
@@ -48,18 +50,19 @@
                      <li><a href="<?= base_url(); ?>core/error">Quality Trend</a></li> -->
                  </ul>
              </li>
-             <li><a><i class="fa fa-cogs"></i> Mesin <span class="fa fa-chevron-down"></span></a>
+             <li><a><i class="fa fa-cogs"></i> Teknik <span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>core/error">-</a></li>
-                     <!-- <li><a href="<?= base_url(); ?>core/error">Master Mesin</a></li>
-                     <li><a href="<?= base_url(); ?>core/error">Performance Mesin</a></li>
+                     <li><a href="<?= base_url(); ?>dashplpteknik" onclick="logModule('Dashboard PLP Teknik')">Dashboard PLP Teknik</a></li>
+                     <li><a href="<?= base_url(); ?>monteknik" onclick="logModule('Monitoring PLP Teknik')">Monitoring PLP Teknik</a></li>
+                     <li><a href="<?= base_url(); ?>komplplhp" onclick="logModule('Komparasi PLP & LHP')">Komparasi PLP & LHP</a></li>
+                     <!-- <li><a href="<?= base_url(); ?>core/error">Performance Mesin</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Utilization Mesin</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Histori Mesin</a></li> -->
                  </ul>
              </li>
              <li><a><i class="fa fa-database"></i> Master Data <span class="fa fa-chevron-down"></span></a>
                  <ul class="nav child_menu">
-                     <li><a href="<?= base_url(); ?>masterlimplan">Master Limit Plan</a></li>
+                     <li><a href="<?= base_url(); ?>masterlimplan" onclick="logModule('Master Limit Plan')">Master Limit Plan</a></li>
                      <li><a href="<?= base_url(); ?>core/error">-</a></li>
                      <!-- <li><a href="<?= base_url(); ?>core/error">Produk</a></li>
                      <li><a href="<?= base_url(); ?>core/error">Proses</a></li>
@@ -72,3 +75,15 @@
      </div>
 
  </div>
+ <script>
+     function logModule(namaModule) {
+         fetch('<?= base_url("core/log_module") ?>', {
+             method: 'POST',
+             keepalive: true,
+             headers: {
+                 'Content-Type': 'application/x-www-form-urlencoded'
+             },
+             body: 'nama_module=' + encodeURIComponent(namaModule)
+         });
+     }
+ </script>

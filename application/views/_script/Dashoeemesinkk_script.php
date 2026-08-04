@@ -829,6 +829,8 @@
                 return;
             }
 
+            let loadStartTime = 0;
+
             console.log('tahun:', $('#tahun').val());
             console.log('bulan:', $('#bulan').val());
             console.log('kdmesin:', mesinData.kdmesin);
@@ -847,6 +849,7 @@
                     tanggal_kk: kkData ? kkData.tanggal_kk : ''
                 },
                 beforeSend: function() {
+                    loadStartTime = Date.now();
                     page.find('#loadingDashboardKK').show();
 
                     page.find('#btnBrowse').prop('disabled', true).html(
@@ -915,6 +918,9 @@
                     alert('Gagal mengambil data dashboard.');
                 },
                 complete: function() {
+                    let durationSec = ((Date.now() - loadStartTime) / 1000).toFixed(2);
+                    page.find('#loadDurationText').text('Waktu load data: ' + durationSec + ' detik');
+
                     page.find('#loadingDashboardKK').hide();
 
                     page.find('#btnBrowse').prop('disabled', false).html(

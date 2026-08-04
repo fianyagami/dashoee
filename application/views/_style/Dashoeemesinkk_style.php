@@ -259,5 +259,13 @@
         line-height: 1.2;
     }
 
+    #page-dashoeekk .load-duration-text {
+        text-align: right;
+        font-size: 11px;
+        color: purple;
+        margin-top: 5px;
+        padding-right: 5px;
+    }
+
     /* Target OEE Unit */
 </style>

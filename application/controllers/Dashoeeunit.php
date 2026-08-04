@@ -15,8 +15,8 @@ class Dashoeeunit extends CI_Controller
 
     public function index()
     {
-        $data['tahun']  = (int) date('Y');
-        $data['minggu'] = (int) date('W'); // PHP 'W' = ISO-8601 week number, sama definisinya dgn Oracle IW
+        $data['tahun_unit'] = date('Y');
+        $data['bulan_unit'] = date('n');
 
         $data['judul']      = "OEE per Unit";
         $data['template']   = "Dashoeeunit_view";
@@ -28,36 +28,16 @@ class Dashoeeunit extends CI_Controller
         $this->load->view('v_main', $data);
     }
 
-    /**
-     * Hitung rentang tanggal Senin s.d Minggu dari ISO Year + ISO Week.
-     * Return array('awal' => 'Y-m-d', 'akhir' => 'Y-m-d')
-     */
-    private function getWeekRange($tahun, $minggu)
-    {
-        $dto = new DateTime();
-        $dto->setISODate((int) $tahun, (int) $minggu, 1); // hari ke-1 = Senin
-
-        $awal = $dto->format('Y-m-d');
-
-        $dto->modify('+6 days'); // Minggu (hari terakhir minggu itu)
-        $akhir = $dto->format('Y-m-d');
-
-        return array('awal' => $awal, 'akhir' => $akhir);
-    }
-
     public function getDashboard()
     {
-        $tahun  = $this->input->post('tahun');
-        $minggu = $this->input->post('minggu');
-
-        $range = $this->getWeekRange($tahun, $minggu);
+        $thn = $this->input->post('thn');
+        $bln = $this->input->post('bln');
 
         $result = array(
-            'summary'       => $this->Dashoeeunit_mod->getSummaryOEE($range['awal'], $range['akhir']),
-            'downtime'      => $this->Dashoeeunit_mod->getTopDowntime($range['awal'], $range['akhir']),
-            'defect'        => $this->Dashoeeunit_mod->getTopDefect($range['awal'], $range['akhir']),
-            'actual_target' => $this->Dashoeeunit_mod->getActualTarget($range['awal'], $range['akhir']),
-            'range'         => $range
+            'summary'       => $this->Dashoeeunit_mod->getSummaryOEE($thn, $bln),
+            'downtime'      => $this->Dashoeeunit_mod->getTopDowntime($thn, $bln),
+            'defect'        => $this->Dashoeeunit_mod->getTopDefect($thn, $bln),
+            'actual_target' => $this->Dashoeeunit_mod->getActualTarget($thn, $bln)
         );
 
         echo json_encode($result);
@@ -65,13 +45,11 @@ class Dashoeeunit extends CI_Controller
 
     public function getDetailModal()
     {
-        $type   = $this->input->post('type');
-        $tahun  = $this->input->post('tahun');
-        $minggu = $this->input->post('minggu');
+        $type = $this->input->post('type');
+        $thn  = $this->input->post('thn');
+        $bln  = $this->input->post('bln');
 
-        $range = $this->getWeekRange($tahun, $minggu);
-
-        $data = $this->Dashoeeunit_mod->getDetailModal($type, $range['awal'], $range['akhir']);
+        $data = $this->Dashoeeunit_mod->getDetailModal($type, $thn, $bln);
 
         echo json_encode(array('data' => $data));
     }

@@ -816,6 +816,8 @@
             let tahun = $('#tahun').val();
             let minggu = $('#minggu').val();
 
+            let loadStartTime = 0;
+
             $.ajax({
                 url: '<?= site_url("Dashoeeweek/getDashboard") ?>',
                 type: 'POST',
@@ -825,6 +827,7 @@
                     minggu: minggu
                 },
                 beforeSend: function() {
+                    loadStartTime = Date.now();
                     page.find('#loadingDashboardWeek').show();
 
                     page.find('#btnBrowse').prop('disabled', true).html(
@@ -886,6 +889,9 @@
                     alert('Gagal mengambil data dashboard.');
                 },
                 complete: function() {
+                    let durationSec = ((Date.now() - loadStartTime) / 1000).toFixed(2);
+                    page.find('#loadDurationText').text('Waktu load data: ' + durationSec + ' detik');
+
                     page.find('#loadingDashboardWeek').hide();
 
                     page.find('#btnBrowse').prop('disabled', false).html(

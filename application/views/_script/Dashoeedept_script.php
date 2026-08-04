@@ -4,12 +4,30 @@
 
 <script>
     $(document).ready(function() {
-        var page = $('#page-dashoeeunit-unit');
+        var page = $('#page-dashoeedept-dept');
         if (page.length === 0) return;
 
         var tblDetailAR = null;
         var tblDetailQR = null;
         var tblDetailPR = null;
+
+        // DROPDOWN NAMA DEPARTEMEN
+        $('#nama_departemen').select2({
+            placeholder: 'Pilih Nama Departemen',
+            ajax: {
+                url: '<?= site_url("Dashoeedept/getDepartemen") ?>',
+                dataType: 'json',
+                delay: 300,
+                data: function(params) {
+                    return {
+                        q: params.term
+                    };
+                },
+                processResults: function(data) {
+                    return data;
+                }
+            }
+        });
 
         // KLIK BUTTON BROWSE
         $('#btnBrowse').click(function() {
@@ -31,24 +49,32 @@
         });
 
         function getFilterValue() {
-            let thn = $('#tahun_unit').val();
-            let bln = $('#bulan_unit').val();
+            let thn = $('#tahun_dept').val();
+            let bln = $('#bulan_dept').val();
+            let departemen = $('#nama_departemen').val();
+
+            if (!departemen) {
+                alert('Nama Departemen wajib dipilih.');
+                return null;
+            }
 
             return {
                 thn: thn,
-                bln: bln
+                bln: bln,
+                departemen: departemen
             };
         }
 
         function loadDetailModal(type, target, filter) {
             $.ajax({
-                url: '<?= site_url("Dashoeeunit/getDetailModal") ?>',
+                url: '<?= site_url("Dashoeedept/getDetailModal") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     type: type,
                     thn: filter.thn,
-                    bln: filter.bln
+                    bln: filter.bln,
+                    departemen: filter.departemen
                 },
                 beforeSend: function() {
                     $(target).find('tbody').html(
@@ -190,37 +216,37 @@
                         targets: 0,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // NOMOR_LHP
                     {
                         targets: 1,
                         width: "90px",
                         className: "text-center"
-                    },
+                    }, // NOMOR_KK
                     {
                         targets: 2,
                         width: "90px"
-                    },
+                    }, // TANGGAL
                     {
                         targets: 3,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // NO_URUT_DETAIL
                     {
                         targets: 4,
                         width: "110px",
                         className: "text-center"
-                    },
+                    }, // MESIN
                     {
                         targets: 5,
                         width: "130px"
-                    },
+                    }, // PROSES
                     {
                         targets: 7,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // SHIFT_
                     {
-                        targets: 12,
+                        targets: 12, // WAKTU_ASLI
                         width: "70px",
                         createdCell: function(td) {
                             $(td).css({
@@ -229,7 +255,7 @@
                         }
                     },
                     {
-                        targets: 13,
+                        targets: 13, // LIMIT_PLAN
                         width: "70px",
                         createdCell: function(td) {
                             $(td).css({
@@ -239,7 +265,7 @@
                         }
                     },
                     {
-                        targets: 14,
+                        targets: 14, //  WAKTU_BLT
                         width: "70px",
                         createdCell: function(td) {
                             $(td).css({
@@ -272,13 +298,13 @@
                     var totalWaktu = api
                         .column(13, {
                             search: 'applied'
-                        })
+                        }) // LIMITPLAN
                         .data()
                         .reduce(function(a, b) {
                             return parseNumber(a) + parseNumber(b);
                         }, 0);
 
-                    $(api.column(14).footer()).html(formatNumber(totalWaktu));
+                    $(api.column(14).footer()).html(formatNumber(totalWaktu)); // WAKTU_BLT
                 }
             });
 
@@ -391,37 +417,37 @@
                         targets: 0,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // NOMOR_LHP
                     {
                         targets: 1,
                         width: "90px",
                         className: "text-center"
-                    },
+                    }, // NOMOR_KK
                     {
                         targets: 2,
                         width: "90px"
-                    },
+                    }, // TANGGAL
                     {
                         targets: 3,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // NO_URUT_DETAIL
                     {
                         targets: 4,
                         width: "110px",
                         className: "text-center"
-                    },
+                    }, // MESIN
                     {
                         targets: 5,
                         width: "130px"
-                    },
+                    }, // PROSES
                     {
                         targets: 7,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // SHIFT_
                     {
-                        targets: 9,
+                        targets: 9, // BAIK
                         width: "70px",
                         createdCell: function(td) {
                             $(td).css({
@@ -433,13 +459,13 @@
                         targets: 10,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // SAT_HASIL_BAIK
                     {
                         targets: 11,
                         width: "210px"
-                    },
+                    }, // NAMA_WASTE
                     {
-                        targets: 12,
+                        targets: 12, // RUSAK
                         width: "70px",
                         createdCell: function(td) {
                             $(td).css({
@@ -451,9 +477,9 @@
                         targets: 13,
                         width: "70px",
                         className: "text-center"
-                    },
+                    }, // SAT_HASIL_RUSAK
                     {
-                        targets: 14,
+                        targets: 14, // OUTPUT
                         width: "80px",
                         createdCell: function(td) {
                             $(td).css({
@@ -605,37 +631,37 @@
                 columnDefs: [{
                         targets: 0,
                         width: "90px"
-                    },
+                    }, // TANGGAL
                     {
                         targets: 1,
                         width: "100px",
                         className: "text-center"
-                    },
+                    }, // NOMOR_KK
                     {
                         targets: 2,
                         width: "50px"
-                    },
+                    }, // SHIFT_
                     {
                         targets: 3,
                         width: "110px"
-                    },
+                    }, // MESIN
                     {
                         targets: 4,
                         width: "150px"
-                    },
+                    }, // PRODUK
                     {
                         targets: 5,
                         width: "150px"
-                    },
+                    }, // PROSES
                     {
-                        targets: 6,
+                        targets: 6, // TOTAL_OUTPUT
                         width: "90px",
                         createdCell: function(td) {
                             $(td).css('font-weight', 'bold');
                         }
                     },
                     {
-                        targets: 7,
+                        targets: 7, // WAKTU_PRODUKSI
                         width: "90px",
                         createdCell: function(td) {
                             $(td).css('font-weight', 'bold');
@@ -644,11 +670,11 @@
                     {
                         targets: 8,
                         width: "90px"
-                    },
+                    }, // AVG_TARGET
                     {
                         targets: 9,
                         width: "90px"
-                    }
+                    } // PR
                 ],
 
                 language: {
@@ -745,22 +771,26 @@
 
         function loadDashboard() {
             let filter = getFilterValue();
+            if (!filter) return;
 
-            let namaBulan = $('#bulan_unit option:selected').text();
+            let departemenText = $('#nama_departemen').select2('data')[0].text;
+            let namaBulan = $('#bulan_dept option:selected').text();
+
             let loadStartTime = 0;
 
             $.ajax({
-                url: '<?= site_url("Dashoeeunit/getDashboard") ?>',
+                url: '<?= site_url("Dashoeedept/getDashboard") ?>',
                 type: 'POST',
                 dataType: 'json',
                 data: {
                     thn: filter.thn,
-                    bln: filter.bln
+                    bln: filter.bln,
+                    departemen: filter.departemen
                 },
                 beforeSend: function() {
                     loadStartTime = Date.now();
 
-                    page.find('#loadingDashboardUnit').show();
+                    page.find('#loadingDashboardDept').show();
                     page.find('#loadDurationText').text('');
 
                     page.find('#btnBrowse').prop('disabled', true).html(
@@ -771,7 +801,7 @@
                     let s = res.summary;
 
                     $('#dashboardTitle').html(
-                        '<div class="dashboard-title-main">Dashboard OEE TSS-01</div>' +
+                        '<div class="dashboard-title-main">Dashboard OEE - ' + departemenText + '</div>' +
                         '<div class="dashboard-title-sub">' + namaBulan + ' ' + filter.thn + '</div>'
                     );
 
@@ -818,7 +848,7 @@
                     let durationSec = ((Date.now() - loadStartTime) / 1000).toFixed(2);
                     page.find('#loadDurationText').text('Waktu load data: ' + durationSec + ' detik');
 
-                    page.find('#loadingDashboardUnit').hide();
+                    page.find('#loadingDashboardDept').hide();
 
                     page.find('#btnBrowse').prop('disabled', false).html(
                         '<i class="fa fa-search"></i> Browse'

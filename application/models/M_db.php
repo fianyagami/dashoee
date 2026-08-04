@@ -2,6 +2,47 @@
 
 class M_db extends CI_Model
 {
+    public function execId($kolom, $tabel)
+    {
+        // Whitelist karakter identifier, cegah SQL Injection lewat nama kolom/tabel
+        if (!preg_match('/^[A-Za-z0-9_]+$/', $kolom) || !preg_match('/^[A-Za-z0-9_]+$/', $tabel)) {
+            show_error('Parameter execId tidak valid.');
+        }
+
+        $sql = "SELECT NVL(MAX($kolom), 0) + 1 AS NEXT_ID FROM $tabel";
+        $query = $this->db->query($sql);
+
+        return (int) $query->row()->NEXT_ID;
+    }
+
+    public function insertLogModule($id_user, $nama_module)
+    {
+        $id_module_log = $this->execId('ID_MODULE_LOG', 'DASHOEE_MODULE_LOG');
+
+        $sql = "
+        INSERT INTO DASHOEE_MODULE_LOG
+        (
+            ID_MODULE_LOG,
+            ID_USER,
+            NAMA_MODULE,
+            DATE_TIME
+        )
+        VALUES
+        (
+            ?,
+            ?,
+            ?,
+            CURRENT_DATE
+        )
+    ";
+
+        return $this->db->query($sql, [
+            $id_module_log,
+            $id_user,
+            $nama_module
+        ]);
+    }
+
     //======= Custom Query =======
     function getCustom($q)
     {

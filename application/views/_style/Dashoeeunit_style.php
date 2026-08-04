@@ -1,28 +1,28 @@
 <style>
-    #page-dashoeeunit .filter-box {
+    #page-dashoeeunit-unit .filter-box {
         margin-bottom: 15px;
     }
 
-    #page-dashoeeunit .dashboard-title {
+    #page-dashoeeunit-unit .dashboard-title {
         text-align: center;
         margin: 20px 0;
         line-height: 1.4;
     }
 
-    #page-dashoeeunit .dashboard-title-main {
+    #page-dashoeeunit-unit .dashboard-title-main {
         font-size: 26px;
         font-weight: bold;
         color: #2A5C8A;
         text-decoration: underline;
     }
 
-    #page-dashoeeunit .dashboard-title-sub {
+    #page-dashoeeunit-unit .dashboard-title-sub {
         font-size: 20px;
         font-weight: bold;
         color: #16A085;
     }
 
-    #page-dashoeeunit .oee-panel {
+    #page-dashoeeunit-unit .oee-panel {
         border: 1px solid #ddd;
         padding: 12px;
         margin-bottom: 15px;
@@ -30,19 +30,19 @@
         border-radius: 4px;
     }
 
-    #page-dashoeeunit .oee-panel-title {
+    #page-dashoeeunit-unit .oee-panel-title {
         text-align: center;
         font-weight: bold;
         margin-bottom: 10px;
         text-decoration: underline;
     }
 
-    #page-dashoeeunit .chart-box {
+    #page-dashoeeunit-unit .chart-box {
         width: 100%;
         height: 320px;
     }
 
-    #page-dashoeeunit .oee-score {
+    #page-dashoeeunit-unit .oee-score {
         text-align: center;
         font-size: 52px;
         font-weight: bold;
@@ -50,14 +50,14 @@
         margin-top: 45px;
     }
 
-    #page-dashoeeunit .oee-status {
+    #page-dashoeeunit-unit .oee-status {
         text-align: center;
         font-size: 28px;
         font-weight: bold;
         color: purple;
     }
 
-    #page-dashoeeunit .oee-formula {
+    #page-dashoeeunit-unit .oee-formula {
         text-align: center;
         font-size: 18px;
         font-weight: bold;
@@ -65,20 +65,20 @@
         margin-top: 15px;
     }
 
-    #page-dashoeeunit .select2-container {
+    #page-dashoeeunit-unit .select2-container {
         width: 100% !important;
     }
 
-    #page-dashoeeunit .oee-progress-wrap {
+    #page-dashoeeunit-unit .oee-progress-wrap {
         margin-top: 22px;
         padding: 0 25px;
     }
 
-    #page-dashoeeunit .oee-progress-item {
+    #page-dashoeeunit-unit .oee-progress-item {
         margin-bottom: 12px;
     }
 
-    #page-dashoeeunit .oee-progress-label {
+    #page-dashoeeunit-unit .oee-progress-label {
         display: flex;
         justify-content: space-between;
         font-size: 13px;
@@ -87,40 +87,48 @@
         color: #555;
     }
 
-    #page-dashoeeunit .oee-progress-wrap .progress {
+    #page-dashoeeunit-unit .oee-progress-wrap .progress {
         height: 16px;
         margin-bottom: 0;
         border-radius: 20px;
         background: #f1f1f1;
     }
 
-    #page-dashoeeunit .oee-progress-wrap .progress-bar {
+    #page-dashoeeunit-unit .oee-progress-wrap .progress-bar {
         line-height: 16px;
         border-radius: 20px;
     }
 
-    #page-dashoeeunit .oee-panel-detail-link {
+    #page-dashoeeunit-unit .oee-panel-detail-link {
         text-align: right;
         margin-top: 10px;
         padding-top: 8px;
         border-top: 1px dashed #ddd;
     }
 
-    #page-dashoeeunit .oee-panel-detail-link a {
+    #page-dashoeeunit-unit .oee-panel-detail-link a {
         font-size: 14px;
         font-weight: 600;
         color: #05a73b;
         text-decoration: none;
     }
 
-    #page-dashoeeunit .oee-panel-detail-link a:hover {
+    #page-dashoeeunit-unit .oee-panel-detail-link a:hover {
         text-decoration: underline;
     }
 
-    #page-dashoeeunit .oee-panel-detail-link a.disabled {
+    #page-dashoeeunit-unit .oee-panel-detail-link a.disabled {
         color: #aaa;
         cursor: not-allowed;
         pointer-events: none;
+    }
+
+    #page-dashoeeunit-unit .load-duration-text {
+        text-align: right;
+        font-size: 11px;
+        color: purple;
+        margin-top: 5px;
+        padding-right: 5px;
     }
 
     .table-dashoeekk {
@@ -199,7 +207,7 @@
     /* filter row */
 
     /* Target OEE Unit */
-    #page-dashoeeunit .target-unit-box {
+    #page-dashoeeunit-unit .target-unit-box {
         margin-top: 20px;
         padding: 30px;
         text-align: center;
@@ -208,14 +216,14 @@
         border-radius: 6px;
     }
 
-    #page-dashoeeunit .target-unit-label {
+    #page-dashoeeunit-unit .target-unit-label {
         font-size: 17px;
         font-weight: 700;
         color: #c0392b;
         letter-spacing: 0.5px;
     }
 
-    #page-dashoeeunit .target-unit-value {
+    #page-dashoeeunit-unit .target-unit-value {
         font-size: 28px;
         font-weight: bold;
         color: #e74c3c;
